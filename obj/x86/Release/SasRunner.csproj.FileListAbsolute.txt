@@ -1,0 +1,9 @@
+/home/misha/Projects/SasRunner/SasRunner/bin/Release/SasRunner.exe
+/home/misha/Projects/SasRunner/SasRunner/obj/x86/Release/SasRunner.csproj.CoreCompileInputs.cache
+/home/misha/Projects/SasRunner/SasRunner/obj/x86/Release/SasRunner.exe
+/home/misha/Desktop/SasRunner/bin/Release/SasRunner.exe
+/home/misha/Desktop/SasRunner/obj/x86/Release/SasRunner.csproj.CoreCompileInputs.cache
+/home/misha/Desktop/SasRunner/obj/x86/Release/SasRunner.exe
+/home/xmmsas/Desktop/SasRunner/bin/Release/SasRunner.exe
+/home/xmmsas/Desktop/SasRunner/obj/x86/Release/SasRunner.csproj.CoreCompileInputs.cache
+/home/xmmsas/Desktop/SasRunner/obj/x86/Release/SasRunner.exe

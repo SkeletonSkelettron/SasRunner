@@ -1,0 +1,698 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<stetic-interface>
+  <configuration>
+    <images-root-path>..</images-root-path>
+  </configuration>
+  <import>
+    <widget-library name="../bin/Release/SasRunner.exe" internal="true" />
+  </import>
+  <widget class="Gtk.Window" id="MainWindow" design-size="979 638">
+    <action-group name="Default" />
+    <property name="MemberName" />
+    <property name="Title" translatable="yes">SasRunner</property>
+    <property name="WindowPosition">CenterOnParent</property>
+    <property name="DefaultWidth">800</property>
+    <property name="DefaultHeight">600</property>
+    <signal name="DeleteEvent" handler="OnDeleteEvent" />
+    <child>
+      <widget class="Gtk.VBox" id="vbox1">
+        <property name="MemberName" />
+        <property name="Spacing">6</property>
+        <child>
+          <widget class="Gtk.Notebook" id="notebook1">
+            <property name="MemberName" />
+            <property name="CanFocus">True</property>
+            <property name="CurrentPage">0</property>
+            <child>
+              <widget class="Gtk.FileChooserWidget" id="filechooserwidget1">
+                <property name="MemberName" />
+                <property name="Action">SelectFolder</property>
+              </widget>
+            </child>
+            <child>
+              <widget class="Gtk.Label" id="label1">
+                <property name="MemberName" />
+                <property name="LabelProp" translatable="yes">Choose folder</property>
+              </widget>
+              <packing>
+                <property name="type">tab</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.ScrolledWindow" id="GtkScrolledWindow4">
+                <property name="MemberName" />
+                <property name="ShadowType">In</property>
+                <child>
+                  <widget class="Gtk.TextView" id="spectra_textview">
+                    <property name="MemberName" />
+                    <property name="CanFocus">True</property>
+                    <property name="ShowScrollbars">True</property>
+                    <property name="Text">#!/bin/bash
+# need to enable SAS first!
+. setsas.sh
+
+export SAS_ODF={sas_odf_dir}/
+cifbuild
+export SAS_CCF={sas_odf_dir}/ccf.cif
+odfingest
+SUMFILE=( *SUM.SAS)
+SAS_ODF=$SUMFILE
+export SAS_ODF
+epproc
+
+PNEVFILE=( *EPN*ImagingEvts.ds)
+cp -f $PNEVFILE pn_evt.fits
+
+ds9 $PNEVFILE
+
+#------------------------------------- Edit here ---------
+TARGET="RXJ1856"                  #---- target ID
+EBAND="(PI in [150:15000])"      #---- Energy band
+SRCREGFILE="src.reg"           #---- Source reg file
+BKGREGFILE="bkg.reg"           #---- Background reg file
+THRESHOLD=0.4                    #---- Threshold for GTI filtering
+#---------------------------------------------------------
+
+shopt -s nullglob
+
+#------- Go to reduction dir where ccf.cif and SUMMARY file are located ----------
+#cd {workingdir}
+
+#------- Set environment variables SAS_CCF and SAS_ODF (observation-specific) ----
+SAS_CCF=ccf.cif ; export SAS_CCF
+SUMFILE=( *SUM.SAS)
+SAS_ODF=$SUMFILE ; export SAS_ODF
+
+#------- Get ObsID and satellite revolution from the SUMMARY file ----------------
+OBSID=`grep '/ Observation Identifier' &lt; $SUMFILE | awk '{print $1}'`
+REV=`grep '/ Revolution Identifier' &lt; $SUMFILE | awk '{print $1}'`
+
+#------- Get source and background coordinates from reg files --------------------
+awk 'BEGIN{FS = "("};/circle/{print $2}' $SRCREGFILE &gt; toto
+SRCREGCOORD=`awk 'BEGIN{FS = ")"};{print $1}' toto`
+awk 'BEGIN{FS = "("};/circle/{print $2}' $BKGREGFILE &gt; toto
+BKGREGCOORD=`awk 'BEGIN{FS = ")"};{print $1}' toto`
+rm -f toto
+SRCREG="((X,Y) in circle($SRCREGCOORD))"
+BKGREG="((X,Y) in circle($BKGREGCOORD))"
+
+#------- Find pn event list to work with and copy it to spec dir -----------------
+
+#cp -f $PNEVFILE ../spectra
+
+#------- Change to spec directory ------------------------------------------------
+#cd ../spectra
+
+#------- Copy event file ---------------------------------------------------------
+
+
+#------- Keep a record of the SAS version of the analysis in the directory -------
+sasversion &gt; "sasvers.read"
+
+#------- Filter periods of high background ---------------------------------------
+evselect table=pn_evt.fits withrateset=yes rateset=pn_bkgrate.fits timecolumn=TIME \
+         maketimecolumn=yes timebinsize=100 makeratecolumn=yes \
+         expression='#XMMEA_EP &amp;&amp; (PI&gt;10000&amp;&amp;PI&lt;12000) &amp;&amp; (PATTERN&lt;=4)'
+
+#------- Plot background light curve ---------------------------------------------
+dsplot table=pn_bkgrate.fits x=TIME y=RATE
+
+#------- Generate GTI ------------------------------------------------------------
+#tabgtigen table=pn_bkgrate.fits gtiset=pn_bkggti.fits expression='RATE&lt;=$THRESHOLD'
+
+tabgtigen table=pn_bkgrate.fits expression='RATE&lt;=0.4' gtiset=pn_bkggti.fits 
+
+#------- Filter event file with GTI ----------------------------------------------
+evselect table=pn_evt.fits withfilteredset=yes filteredset=pn_flt_evt.fits \
+         destruct=yes keepfilteroutput=yes \
+	 expression='#XMMEA_EP &amp;&amp; gti(pn_bkggti.fits,TIME) &amp;&amp; (PI&gt;150)'
+
+#------- Examine filtered file ---------------------------------------------------
+evselect table=pn_flt_evt.fits withrateset=yes rateset=pn_bkgrate_flt.fits timecolumn=TIME \
+         timebinsize=100 makeratecolumn=yes maketimecolumn=yes \
+         expression='(PI in [10000:12000]) &amp;&amp; (PATTERN&lt;=4) &amp;&amp; #XMMEA_EP'
+dsplot table=pn_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
+
+#------- Create the source spectrum ----------------------------------------------
+evselect table=pn_flt_evt.fits withspectrumset=yes spectrumset=pn_spec.fits \
+         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+	 specchannelmin=0 specchannelmax=20479 \
+	 expression="#XMMEA_EP &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=4) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
+
+#------- Create the background spectrum ------------------------------------------
+evselect table=pn_flt_evt.fits withspectrumset=yes spectrumset=pn_bkg_spec.fits \
+         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+	 specchannelmin=0 specchannelmax=20479 \
+	 expression="#XMMEA_EP &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=4) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
+
+#------- Compute areas of source/background spectra ------------------------------
+backscale spectrumset=pn_spec.fits badpixlocation=pn_flt_evt.fits
+backscale spectrumset=pn_bkg_spec.fits badpixlocation=pn_flt_evt.fits
+
+#------- Create response matrix and ancillary file -------------------------------
+rmfgen spectrumset=pn_spec.fits rmfset=pn.rmf
+arfgen spectrumset=pn_spec.fits arfset=pn.arf withrmfset=yes rmfset=pn.rmf \
+       badpixlocation=pn_flt_evt.fits detmaptype=psf psfenergy=1.0 \
+       extendedsource=no modelee=yes
+       
+#------- Copy files --------------------------------------------------------------
+cp -f pn_spec.fits {nametoreplace}_spec.fits
+cp -f pn_bkg_spec.fits {nametoreplace}_bkg.fits
+cp -f pn.rmf {nametoreplace}.rmf
+cp -f pn.arf {nametoreplace}.arf
+
+specgroup spectrumset={nametoreplace}_spec.fits mincounts=25 rmfset={nametoreplace}.rmf arfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits 
+
+#mv SpecGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits
+
+#specgroup spectrumset=RXJ0420_0141751201_pn_spec.fits mincounts=20 #rmfset=RXJ0420_0141751201_pn.rmf \
+#arfset=RXJ0420_0141751201_pn.arf #backgndset=RXJ0420_0141751201_pn_bkg_spec.fits 
+
+mv SpecGrp.ds {nametoreplace}.ds
+nametoreplace
+#cd ../../../scripts
+
+
+{combine_cp_command}</property>
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="Position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Label" id="label4">
+                <property name="MemberName" />
+                <property name="LabelProp" translatable="yes">spectra.sas</property>
+              </widget>
+              <packing>
+                <property name="type">tab</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.ScrolledWindow" id="GtkScrolledWindow5">
+                <property name="MemberName" />
+                <property name="ShadowType">In</property>
+                <child>
+                  <widget class="Gtk.TextView" id="spmos1textview">
+                    <property name="MemberName" />
+                    <property name="CanFocus">True</property>
+                    <property name="ShowScrollbars">True</property>
+                    <property name="Text">#!/bin/bash
+# need to enable SAS first!
+. setsas.sh
+
+export SAS_ODF={sas_odf_dir}/
+cifbuild
+export SAS_CCF={sas_odf_dir}/ccf.cif
+odfingest
+SUMFILE=( *SUM.SAS)
+SAS_ODF=$SUMFILE
+export SAS_ODF
+emproc
+
+PNEVFILE=( *EMOS1*ImagingEvts.ds)
+cp -f $PNEVFILE mos1_evt.fits
+ds9 $PNEVFILE
+
+#------------------------------------- Edit here ---------
+TARGET="RXJ0420"                  #---- target ID
+EBAND="(PI in [150:12000])"      #---- Energy band
+SRCREGFILE="mos1src.reg"           #---- Source reg file
+BKGREGFILE="mos1bkg.reg"           #---- Background reg file
+THRESHOLD=0.35                    #---- Threshold for GTI filtering
+#---------------------------------------------------------
+
+shopt -s nullglob
+
+#------- Go to reduction dir where ccf.cif and SUMMARY file are located ----------
+#cd {workingdir}
+
+#------- Set environment variables SAS_CCF and SAS_ODF (observation-specific) ----
+SAS_CCF=ccf.cif ; export SAS_CCF
+SUMFILE=( *SUM.SAS)
+SAS_ODF=$SUMFILE ; export SAS_ODF
+
+#------- Get ObsID and satellite revolution from the SUMMARY file ----------------
+OBSID=`grep '/ Observation Identifier' &lt; $SUMFILE | awk '{print $1}'`
+REV=`grep '/ Revolution Identifier' &lt; $SUMFILE | awk '{print $1}'`
+
+#------- Get source and background coordinates from reg files --------------------
+awk 'BEGIN{FS = "("};/circle/{print $2}' $SRCREGFILE &gt; toto
+SRCREGCOORD=`awk 'BEGIN{FS = ")"};{print $1}' toto`
+awk 'BEGIN{FS = "("};/circle/{print $2}' $BKGREGFILE &gt; toto
+BKGREGCOORD=`awk 'BEGIN{FS = ")"};{print $1}' toto`
+rm -f toto
+SRCREG="((X,Y) in circle($SRCREGCOORD))"
+BKGREG="((X,Y) in circle($BKGREGCOORD))"
+
+#------- Find pn event list to work with and copy it to spec dir -----------------
+#cp -f $PNEVFILE ../spectra
+
+#------- Change to spec directory ------------------------------------------------
+#cd ../spectra
+
+#------- Copy event file ---------------------------------------------------------
+
+
+#------- Keep a record of the SAS version of the analysis in the directory -------
+sasversion &gt; "sasvers.read"
+
+#------- Filter periods of high background ---------------------------------------
+evselect table=mos1_evt.fits withrateset=yes rateset=mos1_bkgrate.fits timecolumn=TIME \
+         maketimecolumn=yes timebinsize=100 makeratecolumn=yes \
+         expression='#XMMEA_EM &amp;&amp; (PI&gt;10000) &amp;&amp; (PATTERN==0)'
+
+#------- Plot background light curve ---------------------------------------------
+dsplot table=mos1_bkgrate.fits x=TIME y=RATE
+
+#------- Generate GTI ------------------------------------------------------------
+#tabgtigen table=pn_bkgrate.fits gtiset=pn_bkggti.fits expression='RATE&lt;=$THRESHOLD'
+
+tabgtigen table=mos1_bkgrate.fits expression='RATE&lt;=0.35' gtiset=mos1_bkggti.fits 
+
+#------- Filter event file with GTI ----------------------------------------------
+evselect table=mos1_evt.fits withfilteredset=yes filteredset=mos1_flt_evt.fits \
+         destruct=yes keepfilteroutput=yes \
+	 expression='#XMMEA_EM &amp;&amp; gti(mos1_bkggti.fits,TIME) &amp;&amp; (PI&gt;150)'
+
+#------- Examine filtered file ---------------------------------------------------
+evselect table=mos1_flt_evt.fits withrateset=yes rateset=mos1_bkgrate_flt.fits timecolumn=TIME \
+         timebinsize=100 makeratecolumn=yes maketimecolumn=yes \
+         expression='(PI&gt;10000) &amp;&amp; (PATTERN==0) &amp;&amp; #XMMEA_EM'
+dsplot table=mos1_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
+
+#------- Create the source spectrum ----------------------------------------------
+evselect table=mos1_flt_evt.fits withspectrumset=yes spectrumset=mos1_spec.fits \
+         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+	 specchannelmin=0 specchannelmax=11999 \
+	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
+
+#------- Create the background spectrum ------------------------------------------
+evselect table=mos1_flt_evt.fits withspectrumset=yes spectrumset=mos1_bkg_spec.fits \
+         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+	 specchannelmin=0 specchannelmax=11999 \
+	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
+
+#------- Compute areas of source/background spectra ------------------------------
+backscale spectrumset=mos1_spec.fits badpixlocation=mos1_flt_evt.fits
+backscale spectrumset=mos1_bkg_spec.fits badpixlocation=mos1_flt_evt.fits
+
+#------- Create response matrix and ancillary file -------------------------------
+rmfgen spectrumset=mos1_spec.fits rmfset=mos1.rmf
+arfgen spectrumset=mos1_spec.fits arfset=mos1.arf withrmfset=yes rmfset=mos1.rmf \
+       badpixlocation=mos1_flt_evt.fits detmaptype=psf 
+#psfenergy=1.0 \
+ #      extendedsource=no modelee=yes
+       
+#------- Copy files --------------------------------------------------------------
+cp -f mos1_spec.fits {nametoreplace}_spec.fits
+cp -f mos1_bkg_spec.fits {nametoreplace}_bkg.fits
+cp -f mos1.rmf {nametoreplace}.rmf
+cp -f mos1.arf {nametoreplace}.arf
+
+#specgroup spectrumset=pn_spec.fits mincounts=25 oversample=3 rmfset=pn.rmf \
+#arfset=pn.arf backgndset=pn_bkg_spec.fits 
+
+#mv SpecGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits
+
+specgroup spectrumset={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace}.rmf  \
+arfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits 
+
+mv SpecGrp.ds {nametoreplace}.ds
+       
+
+ #cd ../../../scripts
+{combine_cp_command}</property>
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="Position">2</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Label" id="label5">
+                <property name="MemberName" />
+                <property name="LabelProp" translatable="yes">spmos1</property>
+              </widget>
+              <packing>
+                <property name="type">tab</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.ScrolledWindow" id="GtkScrolledWindow2">
+                <property name="MemberName" />
+                <property name="ShadowType">In</property>
+                <child>
+                  <widget class="Gtk.TextView" id="spmos2textview">
+                    <property name="MemberName" />
+                    <property name="CanFocus">True</property>
+                    <property name="ShowScrollbars">True</property>
+                    <property name="Text" translatable="yes">9#!/bin/bash
+# need to enable SAS first!
+. setsas.sh
+
+export SAS_ODF={sas_odf_dir}/
+cifbuild
+export SAS_CCF={sas_odf_dir}/ccf.cif
+odfingest
+SUMFILE=( *SUM.SAS)
+SAS_ODF=$SUMFILE
+export SAS_ODF
+emproc
+
+PNEVFILE=( *EMOS2*ImagingEvts.ds)
+cp -f $PNEVFILE mos2_evt.fits
+ds9 $PNEVFILE
+
+#------------------------------------- Edit here ---------
+TARGET="RXJ0420"                  #---- target ID
+EBAND="(PI in [150:12000])"      #---- Energy band
+SRCREGFILE="mos2src.reg"           #---- Source reg file
+BKGREGFILE="mos2bkg.reg"           #---- Background reg file
+THRESHOLD=0.35                    #---- Threshold for GTI filtering
+#---------------------------------------------------------
+
+shopt -s nullglob
+
+#------- Go to reduction dir where ccf.cif and SUMMARY file are located ----------
+#cd {workingdir}
+
+#------- Set environment variables SAS_CCF and SAS_ODF (observation-specific) ----
+SAS_CCF=ccf.cif ; export SAS_CCF
+SUMFILE=( *SUM.SAS)
+SAS_ODF=$SUMFILE ; export SAS_ODF
+
+#------- Get ObsID and satellite revolution from the SUMMARY file ----------------
+OBSID=`grep '/ Observation Identifier' &lt; $SUMFILE | awk '{print $1}'`
+REV=`grep '/ Revolution Identifier' &lt; $SUMFILE | awk '{print $1}'`
+
+#------- Get source and background coordinates from reg files --------------------
+awk 'BEGIN{FS = "("};/circle/{print $2}' $SRCREGFILE &gt; toto
+SRCREGCOORD=`awk 'BEGIN{FS = ")"};{print $1}' toto`
+awk 'BEGIN{FS = "("};/circle/{print $2}' $BKGREGFILE &gt; toto
+BKGREGCOORD=`awk 'BEGIN{FS = ")"};{print $1}' toto`
+rm -f toto
+SRCREG="((X,Y) in circle($SRCREGCOORD))"
+BKGREG="((X,Y) in circle($BKGREGCOORD))"
+
+#------- Find pn event list to work with and copy it to spec dir -----------------
+
+#cp -f $PNEVFILE ../spectra
+
+#------- Change to spec directory ------------------------------------------------
+#cd ../spectra
+
+#------- Copy event file ---------------------------------------------------------
+
+
+#------- Keep a record of the SAS version of the analysis in the directory -------
+sasversion &gt; "sasvers.read"
+
+#------- Filter periods of high background ---------------------------------------
+evselect table=mos2_evt.fits withrateset=yes rateset=mos2_bkgrate.fits timecolumn=TIME \
+         maketimecolumn=yes timebinsize=100 makeratecolumn=yes \
+         expression='#XMMEA_EM &amp;&amp; (PI&gt;10000) &amp;&amp; (PATTERN==0)'
+
+#------- Plot background light curve ---------------------------------------------
+dsplot table=mos2_bkgrate.fits x=TIME y=RATE
+
+#------- Generate GTI ------------------------------------------------------------
+#tabgtigen table=pn_bkgrate.fits gtiset=pn_bkggti.fits expression='RATE&lt;=$THRESHOLD'
+
+tabgtigen table=mos2_bkgrate.fits expression='RATE&lt;=0.35' gtiset=mos2_bkggti.fits 
+
+#------- Filter event file with GTI ----------------------------------------------
+evselect table=mos2_evt.fits withfilteredset=yes filteredset=mos2_flt_evt.fits \
+         destruct=yes keepfilteroutput=yes \
+	 expression='#XMMEA_EM &amp;&amp; gti(mos2_bkggti.fits,TIME) &amp;&amp; (PI&gt;150)'
+
+#------- Examine filtered file ---------------------------------------------------
+evselect table=mos2_flt_evt.fits withrateset=yes rateset=mos2_bkgrate_flt.fits timecolumn=TIME \
+         timebinsize=100 makeratecolumn=yes maketimecolumn=yes \
+         expression='(PI&gt;10000) &amp;&amp; (PATTERN==0) &amp;&amp; #XMMEA_EM'
+dsplot table=mos2_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
+
+#------- Create the source spectrum ----------------------------------------------
+evselect table=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_spec.fits \
+         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+	 specchannelmin=0 specchannelmax=11999 \
+	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
+
+#------- Create the background spectrum ------------------------------------------
+evselect table=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_bkg_spec.fits \
+         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+	 specchannelmin=0 specchannelmax=11999 \
+	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
+
+#------- Compute areas of source/background spectra ------------------------------
+backscale spectrumset=mos2_spec.fits badpixlocation=mos2_flt_evt.fits
+backscale spectrumset=mos2_bkg_spec.fits badpixlocation=mos2_flt_evt.fits
+
+#------- Create response matrix and ancillary file -------------------------------
+rmfgen spectrumset=mos2_spec.fits rmfset=mos2.rmf
+arfgen spectrumset=mos2_spec.fits arfset=mos2.arf withrmfset=yes rmfset=mos2.rmf \
+       badpixlocation=mos2_flt_evt.fits detmaptype=psf 
+#psfenergy=1.0 \
+ #      extendedsource=no modelee=yes
+       
+#------- Copy files --------------------------------------------------------------
+cp -f mos2_spec.fits {nametoreplace}_spec.fits
+cp -f mos2_bkg_spec.fits {nametoreplace}_bkg.fits
+cp -f mos2.rmf {nametoreplace}.rmf
+cp -f mos2.arf {nametoreplace}.arf
+
+specgroup spectrumset={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace}.rmf \
+arfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits 
+
+#mv SpecGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits
+
+#specgroup spectrumset=RXJ0420_0651470201_mos2_spec.fits mincounts=20 rmfset=RXJ0420_0651470201_mos2.rmf \
+#arfset=RXJ0420_0651470201_mos2.arf backgndset=RXJ0420_0651470201_mos2_bkg_spec.fits 
+
+mv SpecGrp.ds {nametoreplace}.ds
+       
+
+#cd ../../../scripts
+{combine_cp_command}
+</property>
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="Position">3</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Label" id="label6">
+                <property name="MemberName" />
+                <property name="LabelProp" translatable="yes">spmos2</property>
+              </widget>
+              <packing>
+                <property name="type">tab</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.ScrolledWindow" id="GtkScrolledWindow3">
+                <property name="MemberName" />
+                <property name="Visible">False</property>
+                <property name="ShadowType">In</property>
+                <child>
+                  <widget class="Gtk.TextView" id="combined_script_textview">
+                    <property name="MemberName" />
+                    <property name="CanFocus">True</property>
+                    <property name="ShowScrollbars">True</property>
+                    <property name="Text" translatable="yes" />
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="Position">4</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Label" id="label2">
+                <property name="MemberName" />
+                <property name="LabelProp" translatable="yes">Combined script</property>
+              </widget>
+              <packing>
+                <property name="type">tab</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="Position">0</property>
+            <property name="AutoSize">True</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="Gtk.HBox" id="hbox1">
+            <property name="MemberName" />
+            <property name="Spacing">6</property>
+            <child>
+              <widget class="Gtk.CheckButton" id="epic_check">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Label" translatable="yes">Epic name</property>
+                <property name="Active">True</property>
+                <property name="DrawIndicator">True</property>
+                <property name="HasLabel">True</property>
+                <property name="UseUnderline">True</property>
+              </widget>
+              <packing>
+                <property name="Position">0</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Entry" id="epic_name">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Text" translatable="yes">pn</property>
+                <property name="IsEditable">True</property>
+                <property name="InvisibleChar">•</property>
+              </widget>
+              <packing>
+                <property name="Position">1</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.CheckButton" id="mos1check">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Label" translatable="yes">Mos1 Name</property>
+                <property name="Active">True</property>
+                <property name="DrawIndicator">True</property>
+                <property name="HasLabel">True</property>
+                <property name="UseUnderline">True</property>
+              </widget>
+              <packing>
+                <property name="Position">2</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Entry" id="mos1_name">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Text" translatable="yes">mos1_</property>
+                <property name="IsEditable">True</property>
+                <property name="InvisibleChar">•</property>
+              </widget>
+              <packing>
+                <property name="Position">3</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.CheckButton" id="mos2check">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Label" translatable="yes">Mos2 name</property>
+                <property name="Active">True</property>
+                <property name="DrawIndicator">True</property>
+                <property name="HasLabel">True</property>
+                <property name="UseUnderline">True</property>
+              </widget>
+              <packing>
+                <property name="Position">4</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Entry" id="mos2_name">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Text" translatable="yes">mos2_</property>
+                <property name="IsEditable">True</property>
+                <property name="InvisibleChar">•</property>
+              </widget>
+              <packing>
+                <property name="Position">5</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="Position">1</property>
+            <property name="AutoSize">True</property>
+            <property name="Expand">False</property>
+            <property name="Fill">False</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="Gtk.HBox" id="hbox2">
+            <property name="MemberName" />
+            <property name="Spacing">6</property>
+            <child>
+              <widget class="Gtk.CheckButton" id="combine_spectracheck">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Label" translatable="yes">Combine Spectra</property>
+                <property name="Active">True</property>
+                <property name="DrawIndicator">True</property>
+                <property name="HasLabel">True</property>
+                <property name="UseUnderline">True</property>
+              </widget>
+              <packing>
+                <property name="Position">0</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Entry" id="combined_spectra_name">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Text" translatable="yes">pn</property>
+                <property name="IsEditable">True</property>
+                <property name="InvisibleChar">•</property>
+              </widget>
+              <packing>
+                <property name="Position">1</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder />
+            </child>
+            <child>
+              <placeholder />
+            </child>
+            <child>
+              <placeholder />
+            </child>
+            <child>
+              <placeholder />
+            </child>
+          </widget>
+          <packing>
+            <property name="Position">2</property>
+            <property name="AutoSize">True</property>
+            <property name="Expand">False</property>
+            <property name="Fill">False</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="Gtk.Button" id="button2">
+            <property name="MemberName" />
+            <property name="CanFocus">True</property>
+            <property name="Type">TextOnly</property>
+            <property name="Label" translatable="yes">Generate</property>
+            <property name="UseUnderline">True</property>
+            <signal name="Clicked" handler="OnButton2Clicked" />
+          </widget>
+          <packing>
+            <property name="PackType">End</property>
+            <property name="Position">3</property>
+            <property name="AutoSize">True</property>
+            <property name="Expand">False</property>
+            <property name="Fill">False</property>
+          </packing>
+        </child>
+      </widget>
+    </child>
+  </widget>
+</stetic-interface>
