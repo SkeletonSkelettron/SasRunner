@@ -107,24 +107,37 @@ public partial class MainWindow : Gtk.Window
                         i++;
                     }
 
-                    if (combine_spectracheck.Active)
-                    {
+                    // combine script
+                    var script =
+                     "epicspeccombine pha=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".ds")).ToArray()) + "\" \\"
+                    + "\nbkg=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains("bkg.fits")).ToArray()) + "\" \\"
+                    + "\nrmf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".rmf")).ToArray()) + "\" \\"
+                    + "\narf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".arf")).ToArray()) + "\" \\"
+                    + "\nfilepha=\"{name}_src_grp.ds\" filebkg=\"{name}_bkg_grp.bkg\" filersp=\"{name}_resp_grp.rmf\""
+                    .Replace("{name}", combined_spectra_name.Text?.Trim());
 
-                        var script =
-                         "epicspeccombine pha=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".ds")).ToArray()) + "\" \\"
-                        + "\nbkg=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains("bkg.fits")).ToArray()) + "\" \\"
-                        + "\nrmf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".rmf")).ToArray()) + "\" \\"
-                        + "\narf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".arf")).ToArray()) + "\" \\"
-                        + "\nfilepha=\"{name}_src_grp.ds\" filebkg=\"{name}_bkg_grp.bkg\" filersp=\"{name}_resp_grp.rmf\""
-                        .Replace("{name}", combined_spectra_name.Text?.Trim());
+                    combined_script_textview.Buffer.Text = script;
 
-                        combined_script_textview.Buffer.Text = script;
-                        logToConsole("combination script");
-                        logToConsole(script);
-                    }
+                    // rimraf
+                    script =
+                     "epicspeccombine pha=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".ds")).ToArray()) + "\" \\"
+                    + "\nbkg=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains("bkg.fits")).ToArray()) + "\" \\"
+                    + "\nrmf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".rmf")).ToArray()) + "\" \\"
+                    + "\narf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".arf")).ToArray()) + "\" \\"
+                    + "\nfilepha=\"{name}_src_grp.ds\" filebkg=\"{name}_bkg_grp.bkg\" filersp=\"{name}_resp_grp.rmf\""
+                    .Replace("{name}", combined_spectra_name.Text?.Trim());
+
+                    combined_script_textview.Buffer.Text = script;
+
+
+                    logToConsole("combination script");
+                    logToConsole(script);
+
+
+
                     watch.Stop();
-                    var elapsedS = (watch.ElapsedMilliseconds)/1000 ;
-                    ShowDialog("All jobs done\n processing time: "+ (elapsedS/60).ToString() + " minutes");
+                    var elapsedS = (watch.ElapsedMilliseconds) / 1000;
+                    ShowDialog("All jobs done\n processing time: " + (elapsedS / 60).ToString() + " minutes");
                     button2.Sensitive = true;
                 }
                 catch (Exception ex)
@@ -167,7 +180,7 @@ public partial class MainWindow : Gtk.Window
         psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
         System.Diagnostics.Process p = System.Diagnostics.Process.Start(psi);
         p.WaitForExit();
-        string tool_output = p.StandardOutput.ReadToEnd();
+        string tool_output = p.StandardOutput.ReadToEnd(); 
         logToConsole("\n" + archive + " - begin extract");
         filesTodelete.AddRange(tool_output.Replace("./", "").Split('\n'));
 
@@ -200,35 +213,60 @@ public partial class MainWindow : Gtk.Window
         .Replace("{sas_odf_dir}", workdir)
         .Replace("{nametoreplace}", nameToreplaceBy);
 
+
+        script = script.Replace("{combine_cp_command}", @"
+cp {nametoreplace}_spec.fits ../combined 
+cp {nametoreplace}_bkg.fits ../combined 
+cp {nametoreplace}.rmf ../combined 
+cp {nametoreplace}.rsp ../combined 
+cp {nametoreplace}.arf ../combined 
+cp {nametoreplace}.ds ../combined
+")
+        .Replace("{nametoreplace}", nameToreplaceBy);
+
+        copiedFiles.Add("{nametoreplace}_spec.fits"
+        .Replace("{nametoreplace}", nameToreplaceBy));
+
+        copiedFiles.Add("{nametoreplace}_bkg.fits"
+        .Replace("{nametoreplace}", nameToreplaceBy));
+
+        copiedFiles.Add("{nametoreplace}.rmf"
+        .Replace("{nametoreplace}", nameToreplaceBy));
+
+        copiedFiles.Add("{nametoreplace}.arf"
+        .Replace("{nametoreplace}", nameToreplaceBy));
+
+        copiedFiles.Add("{nametoreplace}.ds"
+        .Replace("{nametoreplace}", nameToreplaceBy));
+
+        script = script.Replace("{withspecranges}", combine_spectracheck.Active ? "" : "withspecranges=yes");
+
         if (combine_spectracheck.Active)
         {
-            script = script.Replace("{combine_cp_command}", @"
-                    cp {nametoreplace}_spec.fits ../combined 
-                    cp {nametoreplace}_bkg.fits ../combined 
-                    cp {nametoreplace}.rmf ../combined 
-                    cp {nametoreplace}.arf ../combined 
-                    cp {nametoreplace}.ds ../combined ")
-            .Replace("{nametoreplace}", nameToreplaceBy);
-
-            copiedFiles.Add("{nametoreplace}_spec.fits"
-            .Replace("{nametoreplace}", nameToreplaceBy));
-
-            copiedFiles.Add("{nametoreplace}_bkg.fits"
-            .Replace("{nametoreplace}", nameToreplaceBy));
-
-            copiedFiles.Add("{nametoreplace}.rmf"
-            .Replace("{nametoreplace}", nameToreplaceBy));
-
-            copiedFiles.Add("{nametoreplace}.arf"
-            .Replace("{nametoreplace}", nameToreplaceBy));
-
-            copiedFiles.Add("{nametoreplace}.ds"
-            .Replace("{nametoreplace}", nameToreplaceBy));
-        }
-        else
+            script = script.Replace("{arfgenNotCombineScript}", "");
+            string acceptchanrange = (jobName == "epic" ? "acceptchanrange=yes" : "");
+            script = script.Replace("{rmfgenRemainningCombineScript}",
+                $"withenergybins=yes energymin={rmfgenEnergyMin.Text} energymax={rmfgenEnergyMax.Text} nenergybins={rmfgennenergybins.Text} {acceptchanrange} " );
+        } else
         {
-            script = script.Replace("{combine_cp_command}", "");
+            script = script.Replace("{rmfgenRemainningCombineScript}", "");
+            if (jobName== "epic") 
+            {
+                script = script.Replace("{arfgenNotCombineScript}",
+                    $"badpixlocation=pn_flt_evt.fits detmaptype=psf psfenergy=1.0 extendedsource=no modelee=yes ");
+            }
+            if(jobName== "_mos1") 
+            {
+                script = script.Replace("{arfgenNotCombineScript}",
+                    $"badpixlocation=mos1_flt_evt.fits detmaptype=psf ");
+            }
+            if (jobName == "_mos2")
+            {
+                script = script.Replace("{arfgenNotCombineScript}",
+                    $"badpixlocation=mos2_flt_evt.fits detmaptype=psf ");
+            }
         }
+
         System.IO.File.WriteAllText(workdir + '/' + scriptName, script);
         // run sas
         psi = new System.Diagnostics.ProcessStartInfo("/bin/bash", scriptName);

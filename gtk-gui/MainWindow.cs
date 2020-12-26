@@ -57,6 +57,20 @@ public partial class MainWindow
 
 	private global::Gtk.Entry combined_spectra_name;
 
+	private global::Gtk.HBox hbox3;
+
+	private global::Gtk.Label label3;
+
+	private global::Gtk.Entry rmfgenEnergyMin;
+
+	private global::Gtk.Label label9;
+
+	private global::Gtk.Entry rmfgenEnergyMax;
+
+	private global::Gtk.Label label8;
+
+	private global::Gtk.Entry rmfgennenergybins;
+
 	private global::Gtk.Button button2;
 
 	protected virtual void Build()
@@ -79,8 +93,7 @@ public partial class MainWindow
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.notebook1 = new global::Gtk.Notebook();
 		this.notebook1.CanFocus = true;
-		this.notebook1.Name = "notebook1";
-		this.notebook1.CurrentPage = 0;
+		this.notebook1.CurrentPage = 3;
 		// Container child notebook1.Gtk.Notebook+NotebookChild
 		this.filechooserwidget1 = new global::Gtk.FileChooserWidget(((global::Gtk.FileChooserAction)(2)));
 		this.filechooserwidget1.Name = "filechooserwidget1";
@@ -141,29 +154,29 @@ public partial class MainWindow
 			"te_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE\n\n#------- Create the source s" +
 			"pectrum ----------------------------------------------\nevselect table=pn_flt_evt" +
 			".fits withspectrumset=yes spectrumset=pn_spec.fits \\\n         energycolumn=PI sp" +
-			"ectralbinsize=5 withspecranges=yes \\\n\t specchannelmin=0 specchannelmax=20479 \\\n\t" +
-			" expression=\"#XMMEA_EP && (FLAG==0) && (PATTERN<=4) && $SRCREG && $EBAND\"\n\n#----" +
-			"--- Create the background spectrum ------------------------------------------\nev" +
-			"select table=pn_flt_evt.fits withspectrumset=yes spectrumset=pn_bkg_spec.fits \\\n" +
-			"         energycolumn=PI spectralbinsize=5 withspecranges=yes \\\n\t specchannelmin" +
-			"=0 specchannelmax=20479 \\\n\t expression=\"#XMMEA_EP && (FLAG==0) && (PATTERN<=4) &" +
-			"& $BKGREG && $EBAND\"\n\n#------- Compute areas of source/background spectra ------" +
-			"------------------------\nbackscale spectrumset=pn_spec.fits badpixlocation=pn_fl" +
-			"t_evt.fits\nbackscale spectrumset=pn_bkg_spec.fits badpixlocation=pn_flt_evt.fits" +
-			"\n\n#------- Create response matrix and ancillary file ---------------------------" +
-			"----\nrmfgen spectrumset=pn_spec.fits rmfset=pn.rmf\narfgen spectrumset=pn_spec.fi" +
-			"ts arfset=pn.arf withrmfset=yes rmfset=pn.rmf \\\n       badpixlocation=pn_flt_evt" +
-			".fits detmaptype=psf psfenergy=1.0 \\\n       extendedsource=no modelee=yes\n      " +
-			" \n#------- Copy files ----------------------------------------------------------" +
-			"----\ncp -f pn_spec.fits {nametoreplace}_spec.fits\ncp -f pn_bkg_spec.fits {nameto" +
-			"replace}_bkg.fits\ncp -f pn.rmf {nametoreplace}.rmf\ncp -f pn.arf {nametoreplace}." +
-			"arf\n\nspecgroup spectrumset={nametoreplace}_spec.fits mincounts=25 rmfset={nameto" +
-			"replace}.rmf arfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\n#m" +
-			"v SpecGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\n#specgroup spectrumset=RXJ0420_0141" +
-			"751201_pn_spec.fits mincounts=20 #rmfset=RXJ0420_0141751201_pn.rmf \\\n#arfset=RXJ" +
-			"0420_0141751201_pn.arf #backgndset=RXJ0420_0141751201_pn_bkg_spec.fits \n\nmv Spec" +
-			"Grp.ds {nametoreplace}.ds\nnametoreplace\n#cd ../../../scripts\n\n\n{combine_cp_comma" +
-			"nd}";
+			"ectralbinsize=5 {withspecranges} \\\n\t specchannelmin=0 specchannelmax=20479 \\\n\t e" +
+			"xpression=\"#XMMEA_EP && (FLAG==0) && (PATTERN<=4) && $SRCREG && $EBAND\"\n\n#------" +
+			"- Create the background spectrum ------------------------------------------\nevse" +
+			"lect table=pn_flt_evt.fits withspectrumset=yes spectrumset=pn_bkg_spec.fits \\\n  " +
+			"       energycolumn=PI spectralbinsize=5 {withspecranges} \\\n\t specchannelmin=0 s" +
+			"pecchannelmax=20479 \\\n\t expression=\"#XMMEA_EP && (FLAG==0) && (PATTERN<=4) && $B" +
+			"KGREG && $EBAND\"\n\n#------- Compute areas of source/background spectra ----------" +
+			"--------------------\nbackscale spectrumset=pn_spec.fits badpixlocation=pn_flt_ev" +
+			"t.fits\nbackscale spectrumset=pn_bkg_spec.fits badpixlocation=pn_flt_evt.fits\n\n#-" +
+			"------ Create response matrix and ancillary file -------------------------------" +
+			"\nrmfgen spectrumset=pn_spec.fits rmfset=pn.rmf {rmfgenRemainningCombineScript}\na" +
+			"rfgen spectrumset=pn_spec.fits arfset=pn.arf withrmfset=yes rmfset=pn.rmf {arfge" +
+			"nNotCombineScript} \n       \n#------- Copy files --------------------------------" +
+			"------------------------------\ncp -f pn_spec.fits {nametoreplace}_spec.fits\ncp -" +
+			"f pn_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f pn.rmf {nametoreplace}.rmf\ncp " +
+			"-f pn.arf {nametoreplace}.arf\n\nspecgroup spectrumset={nametoreplace}_spec.fits m" +
+			"incounts=25 rmfset={nametoreplace}.rmf arfset={nametoreplace}.arf backgndset={na" +
+			"metoreplace}_bkg.fits \n\n#mv SpecGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\n#specgrou" +
+			"p spectrumset=RXJ0420_0141751201_pn_spec.fits mincounts=20 #rmfset=RXJ0420_01417" +
+			"51201_pn.rmf \\\n#arfset=RXJ0420_0141751201_pn.arf #backgndset=RXJ0420_0141751201_" +
+			"pn_bkg_spec.fits \n\nmv SpecGrp.ds {nametoreplace}.ds\n\nmarfrmf rmfil={nametoreplac" +
+			"e}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp\n\n#cd ../../../script" +
+			"s\n\n\n{combine_cp_command}";
 		this.spectra_textview.CanFocus = true;
 		this.spectra_textview.Name = "spectra_textview";
 		this.GtkScrolledWindow4.Add(this.spectra_textview);
@@ -226,29 +239,29 @@ public partial class MainWindow
 			"le=mos1_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE\n\n#------- Create" +
 			" the source spectrum ----------------------------------------------\nevselect tab" +
 			"le=mos1_flt_evt.fits withspectrumset=yes spectrumset=mos1_spec.fits \\\n         e" +
-			"nergycolumn=PI spectralbinsize=5 withspecranges=yes \\\n\t specchannelmin=0 speccha" +
-			"nnelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0) && (PATTERN<=12) && $SRCREG" +
-			" && $EBAND\"\n\n#------- Create the background spectrum ---------------------------" +
-			"---------------\nevselect table=mos1_flt_evt.fits withspectrumset=yes spectrumset" +
-			"=mos1_bkg_spec.fits \\\n         energycolumn=PI spectralbinsize=5 withspecranges=" +
-			"yes \\\n\t specchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG" +
-			"==0) && (PATTERN<=12) && $BKGREG && $EBAND\"\n\n#------- Compute areas of source/ba" +
-			"ckground spectra ------------------------------\nbackscale spectrumset=mos1_spec." +
-			"fits badpixlocation=mos1_flt_evt.fits\nbackscale spectrumset=mos1_bkg_spec.fits b" +
-			"adpixlocation=mos1_flt_evt.fits\n\n#------- Create response matrix and ancillary f" +
-			"ile -------------------------------\nrmfgen spectrumset=mos1_spec.fits rmfset=mos" +
-			"1.rmf\narfgen spectrumset=mos1_spec.fits arfset=mos1.arf withrmfset=yes rmfset=mo" +
-			"s1.rmf \\\n       badpixlocation=mos1_flt_evt.fits detmaptype=psf \n#psfenergy=1.0 " +
-			"\\\n #      extendedsource=no modelee=yes\n       \n#------- Copy files ------------" +
-			"--------------------------------------------------\ncp -f mos1_spec.fits {nametor" +
-			"eplace}_spec.fits\ncp -f mos1_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f mos1.r" +
-			"mf {nametoreplace}.rmf\ncp -f mos1.arf {nametoreplace}.arf\n\n#specgroup spectrumse" +
-			"t=pn_spec.fits mincounts=25 oversample=3 rmfset=pn.rmf \\\n#arfset=pn.arf backgnds" +
-			"et=pn_bkg_spec.fits \n\n#mv SpecGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\nspecgroup s" +
-			"pectrumset={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametorep" +
-			"lace}.rmf  \\\narfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\nmv" +
-			" SpecGrp.ds {nametoreplace}.ds\n       \n\n #cd ../../../scripts\n{combine_cp_comman" +
-			"d}";
+			"nergycolumn=PI spectralbinsize=5 {withspecranges} \\\n\t specchannelmin=0 specchann" +
+			"elmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0) && (PATTERN<=12) && $SRCREG &" +
+			"& $EBAND\"\n\n#------- Create the background spectrum -----------------------------" +
+			"-------------\nevselect table=mos1_flt_evt.fits withspectrumset=yes spectrumset=m" +
+			"os1_bkg_spec.fits \\\n         energycolumn=PI spectralbinsize=5 {withspecranges} " +
+			"\\\n\t specchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0)" +
+			" && (PATTERN<=12) && $BKGREG && $EBAND\"\n\n#------- Compute areas of source/backgr" +
+			"ound spectra ------------------------------\nbackscale spectrumset=mos1_spec.fits" +
+			" badpixlocation=mos1_flt_evt.fits\nbackscale spectrumset=mos1_bkg_spec.fits badpi" +
+			"xlocation=mos1_flt_evt.fits\n\n#------- Create response matrix and ancillary file " +
+			"-------------------------------\nrmfgen spectrumset=mos1_spec.fits rmfset=mos1.rm" +
+			"f {rmfgenRemainningCombineScript}\narfgen spectrumset=mos1_spec.fits arfset=mos1." +
+			"arf withrmfset=yes rmfset=mos1.rmf {arfgenNotCombineScript}\n#psfenergy=1.0 \\\n # " +
+			"     extendedsource=no modelee=yes\n       \n#------- Copy files -----------------" +
+			"---------------------------------------------\ncp -f mos1_spec.fits {nametoreplac" +
+			"e}_spec.fits\ncp -f mos1_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f mos1.rmf {n" +
+			"ametoreplace}.rmf\ncp -f mos1.arf {nametoreplace}.arf\n\n#specgroup spectrumset=pn_" +
+			"spec.fits mincounts=25 oversample=3 rmfset=pn.rmf \\\n#arfset=pn.arf backgndset=pn" +
+			"_bkg_spec.fits \n\n#mv SpecGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\nspecgroup spectr" +
+			"umset={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace}" +
+			".rmf  \\\narfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\nmv Spec" +
+			"Grp.ds {nametoreplace}.ds\n\nmarfrmf rmfil={nametoreplace}.rmf arfil={nametoreplac" +
+			"e}.arf outfil={nametoreplace}.rsp\n\n #cd ../../../scripts\n{combine_cp_command}";
 		this.spmos1textview.CanFocus = true;
 		this.spmos1textview.Name = "spmos1textview";
 		this.GtkScrolledWindow5.Add(this.spmos1textview);
@@ -311,29 +324,31 @@ public partial class MainWindow
 				"able=mos2_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE\n\n#------- Crea" +
 				"te the source spectrum ----------------------------------------------\nevselect t" +
 				"able=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_spec.fits \\\n        " +
-				" energycolumn=PI spectralbinsize=5 withspecranges=yes \\\n\t specchannelmin=0 specc" +
-				"hannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0) && (PATTERN<=12) && $SRCR" +
-				"EG && $EBAND\"\n\n#------- Create the background spectrum -------------------------" +
-				"-----------------\nevselect table=mos2_flt_evt.fits withspectrumset=yes spectrums" +
-				"et=mos2_bkg_spec.fits \\\n         energycolumn=PI spectralbinsize=5 withspecrange" +
-				"s=yes \\\n\t specchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FL" +
-				"AG==0) && (PATTERN<=12) && $BKGREG && $EBAND\"\n\n#------- Compute areas of source/" +
-				"background spectra ------------------------------\nbackscale spectrumset=mos2_spe" +
-				"c.fits badpixlocation=mos2_flt_evt.fits\nbackscale spectrumset=mos2_bkg_spec.fits" +
-				" badpixlocation=mos2_flt_evt.fits\n\n#------- Create response matrix and ancillary" +
-				" file -------------------------------\nrmfgen spectrumset=mos2_spec.fits rmfset=m" +
-				"os2.rmf\narfgen spectrumset=mos2_spec.fits arfset=mos2.arf withrmfset=yes rmfset=" +
-				"mos2.rmf \\\n       badpixlocation=mos2_flt_evt.fits detmaptype=psf \n#psfenergy=1." +
-				"0 \\\n #      extendedsource=no modelee=yes\n       \n#------- Copy files ----------" +
-				"----------------------------------------------------\ncp -f mos2_spec.fits {namet" +
-				"oreplace}_spec.fits\ncp -f mos2_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f mos2" +
-				".rmf {nametoreplace}.rmf\ncp -f mos2.arf {nametoreplace}.arf\n\nspecgroup spectrums" +
-				"et={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace}.rm" +
-				"f \\\narfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\n#mv SpecGrp" +
-				".ds ${TARGET}_${OBSID}_pn_gr3.fits\n\n#specgroup spectrumset=RXJ0420_0651470201_mo" +
-				"s2_spec.fits mincounts=20 rmfset=RXJ0420_0651470201_mos2.rmf \\\n#arfset=RXJ0420_0" +
-				"651470201_mos2.arf backgndset=RXJ0420_0651470201_mos2_bkg_spec.fits \n\nmv SpecGrp" +
-				".ds {nametoreplace}.ds\n       \n\n#cd ../../../scripts\n{combine_cp_command}\n");
+				" energycolumn=PI spectralbinsize=5 {withspecranges} \\\n\t specchannelmin=0 speccha" +
+				"nnelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0) && (PATTERN<=12) && $SRCREG" +
+				" && $EBAND\"\n\n#------- Create the background spectrum ---------------------------" +
+				"---------------\nevselect table=mos2_flt_evt.fits withspectrumset=yes spectrumset" +
+				"=mos2_bkg_spec.fits \\\n         energycolumn=PI spectralbinsize=5 {withspecranges" +
+				"} \\\n\t specchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==" +
+				"0) && (PATTERN<=12) && $BKGREG && $EBAND\"\n\n#------- Compute areas of source/back" +
+				"ground spectra ------------------------------\nbackscale spectrumset=mos2_spec.fi" +
+				"ts badpixlocation=mos2_flt_evt.fits\nbackscale spectrumset=mos2_bkg_spec.fits bad" +
+				"pixlocation=mos2_flt_evt.fits\n\n#------- Create response matrix and ancillary fil" +
+				"e -------------------------------\nrmfgen spectrumset=mos2_spec.fits rmfset=mos2." +
+				"rmf {rmfgenRemainningCombineScript}\narfgen spectrumset=mos2_spec.fits arfset=mos" +
+				"2.arf withrmfset=yes rmfset=mos2.rmf {arfgenNotCombineScript} \n       \n#psfenerg" +
+				"y=1.0 \\\n #      extendedsource=no modelee=yes\n       \n#------- Copy files ------" +
+				"--------------------------------------------------------\ncp -f mos2_spec.fits {n" +
+				"ametoreplace}_spec.fits\ncp -f mos2_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f " +
+				"mos2.rmf {nametoreplace}.rmf\ncp -f mos2.arf {nametoreplace}.arf\n\nspecgroup spect" +
+				"rumset={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace" +
+				"}.rmf \\\narfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\n#mv Spe" +
+				"cGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\n#specgroup spectrumset=RXJ0420_065147020" +
+				"1_mos2_spec.fits mincounts=20 rmfset=RXJ0420_0651470201_mos2.rmf \\\n#arfset=RXJ04" +
+				"20_0651470201_mos2.arf backgndset=RXJ0420_0651470201_mos2_bkg_spec.fits \n\nmv Spe" +
+				"cGrp.ds {nametoreplace}.ds\n       \nmarfrmf rmfil={nametoreplace}.rmf arfil={name" +
+				"toreplace}.arf outfil={nametoreplace}.rsp\n\n#cd ../../../scripts\n{combine_cp_comm" +
+				"and}\n");
 		this.spmos2textview.CanFocus = true;
 		this.spmos2textview.Name = "spmos2textview";
 		this.GtkScrolledWindow2.Add(this.spmos2textview);
@@ -361,7 +376,7 @@ public partial class MainWindow
 		// Notebook tab
 		this.label2 = new global::Gtk.Label();
 		this.label2.Name = "label2";
-		this.label2.LabelProp = global::Mono.Unix.Catalog.GetString("Combined script");
+		this.label2.LabelProp = global::Mono.Unix.Catalog.GetString("Generated scripts");
 		this.notebook1.SetTabLabel(this.GtkScrolledWindow3, this.label2);
 		this.label2.ShowAll();
 		this.vbox1.Add(this.notebook1);
@@ -470,17 +485,83 @@ public partial class MainWindow
 		w21.Expand = false;
 		w21.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
+		this.hbox3 = new global::Gtk.HBox();
+		this.hbox3.Name = "hbox3";
+		this.hbox3.Spacing = 6;
+		// Container child hbox3.Gtk.Box+BoxChild
+		this.label3 = new global::Gtk.Label();
+		this.label3.Name = "label3";
+		this.label3.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen  EnergyMin");
+		this.hbox3.Add(this.label3);
+		global::Gtk.Box.BoxChild w22 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label3]));
+		w22.Position = 0;
+		w22.Expand = false;
+		w22.Fill = false;
+		// Container child hbox3.Gtk.Box+BoxChild
+		this.rmfgenEnergyMin = new global::Gtk.Entry();
+		this.rmfgenEnergyMin.CanFocus = true;
+		this.rmfgenEnergyMin.Name = "rmfgenEnergyMin";
+		this.rmfgenEnergyMin.Text = global::Mono.Unix.Catalog.GetString("0.1");
+		this.rmfgenEnergyMin.IsEditable = true;
+		this.rmfgenEnergyMin.InvisibleChar = '•';
+		this.hbox3.Add(this.rmfgenEnergyMin);
+		global::Gtk.Box.BoxChild w23 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMin]));
+		w23.Position = 1;
+		// Container child hbox3.Gtk.Box+BoxChild
+		this.label9 = new global::Gtk.Label();
+		this.label9.Name = "label9";
+		this.label9.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen EnergyMax");
+		this.hbox3.Add(this.label9);
+		global::Gtk.Box.BoxChild w24 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label9]));
+		w24.Position = 2;
+		w24.Expand = false;
+		w24.Fill = false;
+		// Container child hbox3.Gtk.Box+BoxChild
+		this.rmfgenEnergyMax = new global::Gtk.Entry();
+		this.rmfgenEnergyMax.CanFocus = true;
+		this.rmfgenEnergyMax.Name = "rmfgenEnergyMax";
+		this.rmfgenEnergyMax.Text = global::Mono.Unix.Catalog.GetString("12.0");
+		this.rmfgenEnergyMax.IsEditable = true;
+		this.rmfgenEnergyMax.InvisibleChar = '•';
+		this.hbox3.Add(this.rmfgenEnergyMax);
+		global::Gtk.Box.BoxChild w25 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMax]));
+		w25.Position = 3;
+		// Container child hbox3.Gtk.Box+BoxChild
+		this.label8 = new global::Gtk.Label();
+		this.label8.Name = "label8";
+		this.label8.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen nenergybins");
+		this.hbox3.Add(this.label8);
+		global::Gtk.Box.BoxChild w26 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label8]));
+		w26.Position = 4;
+		w26.Expand = false;
+		w26.Fill = false;
+		// Container child hbox3.Gtk.Box+BoxChild
+		this.rmfgennenergybins = new global::Gtk.Entry();
+		this.rmfgennenergybins.CanFocus = true;
+		this.rmfgennenergybins.Name = "rmfgennenergybins";
+		this.rmfgennenergybins.Text = global::Mono.Unix.Catalog.GetString("2400");
+		this.rmfgennenergybins.IsEditable = true;
+		this.rmfgennenergybins.InvisibleChar = '•';
+		this.hbox3.Add(this.rmfgennenergybins);
+		global::Gtk.Box.BoxChild w27 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgennenergybins]));
+		w27.Position = 5;
+		this.vbox1.Add(this.hbox3);
+		global::Gtk.Box.BoxChild w28 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox3]));
+		w28.Position = 3;
+		w28.Expand = false;
+		w28.Fill = false;
+		// Container child vbox1.Gtk.Box+BoxChild
 		this.button2 = new global::Gtk.Button();
 		this.button2.CanFocus = true;
 		this.button2.Name = "button2";
 		this.button2.UseUnderline = true;
 		this.button2.Label = global::Mono.Unix.Catalog.GetString("Generate");
 		this.vbox1.Add(this.button2);
-		global::Gtk.Box.BoxChild w22 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.button2]));
-		w22.PackType = ((global::Gtk.PackType)(1));
-		w22.Position = 3;
-		w22.Expand = false;
-		w22.Fill = false;
+		global::Gtk.Box.BoxChild w29 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.button2]));
+		w29.PackType = ((global::Gtk.PackType)(1));
+		w29.Position = 4;
+		w29.Expand = false;
+		w29.Fill = false;
 		this.Add(this.vbox1);
 		if ((this.Child != null))
 		{

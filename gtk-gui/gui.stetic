@@ -6,7 +6,7 @@
   <import>
     <widget-library name="../bin/Release/SasRunner.exe" internal="true" />
   </import>
-  <widget class="Gtk.Window" id="MainWindow" design-size="979 638">
+  <widget class="Gtk.Window" id="MainWindow" design-size="947 638">
     <action-group name="Default" />
     <property name="MemberName" />
     <property name="Title" translatable="yes">SasRunner</property>
@@ -22,7 +22,7 @@
           <widget class="Gtk.Notebook" id="notebook1">
             <property name="MemberName" />
             <property name="CanFocus">True</property>
-            <property name="CurrentPage">0</property>
+            <property name="CurrentPage">3</property>
             <child>
               <widget class="Gtk.FileChooserWidget" id="filechooserwidget1">
                 <property name="MemberName" />
@@ -135,13 +135,13 @@ dsplot table=pn_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
 
 #------- Create the source spectrum ----------------------------------------------
 evselect table=pn_flt_evt.fits withspectrumset=yes spectrumset=pn_spec.fits \
-         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+         energycolumn=PI spectralbinsize=5 {withspecranges} \
 	 specchannelmin=0 specchannelmax=20479 \
 	 expression="#XMMEA_EP &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=4) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
 
 #------- Create the background spectrum ------------------------------------------
 evselect table=pn_flt_evt.fits withspectrumset=yes spectrumset=pn_bkg_spec.fits \
-         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+         energycolumn=PI spectralbinsize=5 {withspecranges} \
 	 specchannelmin=0 specchannelmax=20479 \
 	 expression="#XMMEA_EP &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=4) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
 
@@ -150,10 +150,8 @@ backscale spectrumset=pn_spec.fits badpixlocation=pn_flt_evt.fits
 backscale spectrumset=pn_bkg_spec.fits badpixlocation=pn_flt_evt.fits
 
 #------- Create response matrix and ancillary file -------------------------------
-rmfgen spectrumset=pn_spec.fits rmfset=pn.rmf
-arfgen spectrumset=pn_spec.fits arfset=pn.arf withrmfset=yes rmfset=pn.rmf \
-       badpixlocation=pn_flt_evt.fits detmaptype=psf psfenergy=1.0 \
-       extendedsource=no modelee=yes
+rmfgen spectrumset=pn_spec.fits rmfset=pn.rmf {rmfgenRemainningCombineScript}
+arfgen spectrumset=pn_spec.fits arfset=pn.arf withrmfset=yes rmfset=pn.rmf {arfgenNotCombineScript} 
        
 #------- Copy files --------------------------------------------------------------
 cp -f pn_spec.fits {nametoreplace}_spec.fits
@@ -169,7 +167,9 @@ specgroup spectrumset={nametoreplace}_spec.fits mincounts=25 rmfset={nametorepla
 #arfset=RXJ0420_0141751201_pn.arf #backgndset=RXJ0420_0141751201_pn_bkg_spec.fits 
 
 mv SpecGrp.ds {nametoreplace}.ds
-nametoreplace
+
+marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp
+
 #cd ../../../scripts
 
 
@@ -285,13 +285,13 @@ dsplot table=mos1_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
 
 #------- Create the source spectrum ----------------------------------------------
 evselect table=mos1_flt_evt.fits withspectrumset=yes spectrumset=mos1_spec.fits \
-         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+         energycolumn=PI spectralbinsize=5 {withspecranges} \
 	 specchannelmin=0 specchannelmax=11999 \
 	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
 
 #------- Create the background spectrum ------------------------------------------
 evselect table=mos1_flt_evt.fits withspectrumset=yes spectrumset=mos1_bkg_spec.fits \
-         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+         energycolumn=PI spectralbinsize=5 {withspecranges} \
 	 specchannelmin=0 specchannelmax=11999 \
 	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
 
@@ -300,9 +300,8 @@ backscale spectrumset=mos1_spec.fits badpixlocation=mos1_flt_evt.fits
 backscale spectrumset=mos1_bkg_spec.fits badpixlocation=mos1_flt_evt.fits
 
 #------- Create response matrix and ancillary file -------------------------------
-rmfgen spectrumset=mos1_spec.fits rmfset=mos1.rmf
-arfgen spectrumset=mos1_spec.fits arfset=mos1.arf withrmfset=yes rmfset=mos1.rmf \
-       badpixlocation=mos1_flt_evt.fits detmaptype=psf 
+rmfgen spectrumset=mos1_spec.fits rmfset=mos1.rmf {rmfgenRemainningCombineScript}
+arfgen spectrumset=mos1_spec.fits arfset=mos1.arf withrmfset=yes rmfset=mos1.rmf {arfgenNotCombineScript}
 #psfenergy=1.0 \
  #      extendedsource=no modelee=yes
        
@@ -321,7 +320,8 @@ specgroup spectrumset={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset
 arfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits 
 
 mv SpecGrp.ds {nametoreplace}.ds
-       
+
+marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp
 
  #cd ../../../scripts
 {combine_cp_command}</property>
@@ -437,13 +437,13 @@ dsplot table=mos2_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
 
 #------- Create the source spectrum ----------------------------------------------
 evselect table=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_spec.fits \
-         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+         energycolumn=PI spectralbinsize=5 {withspecranges} \
 	 specchannelmin=0 specchannelmax=11999 \
 	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
 
 #------- Create the background spectrum ------------------------------------------
 evselect table=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_bkg_spec.fits \
-         energycolumn=PI spectralbinsize=5 withspecranges=yes \
+         energycolumn=PI spectralbinsize=5 {withspecranges} \
 	 specchannelmin=0 specchannelmax=11999 \
 	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
 
@@ -452,9 +452,9 @@ backscale spectrumset=mos2_spec.fits badpixlocation=mos2_flt_evt.fits
 backscale spectrumset=mos2_bkg_spec.fits badpixlocation=mos2_flt_evt.fits
 
 #------- Create response matrix and ancillary file -------------------------------
-rmfgen spectrumset=mos2_spec.fits rmfset=mos2.rmf
-arfgen spectrumset=mos2_spec.fits arfset=mos2.arf withrmfset=yes rmfset=mos2.rmf \
-       badpixlocation=mos2_flt_evt.fits detmaptype=psf 
+rmfgen spectrumset=mos2_spec.fits rmfset=mos2.rmf {rmfgenRemainningCombineScript}
+arfgen spectrumset=mos2_spec.fits arfset=mos2.arf withrmfset=yes rmfset=mos2.rmf {arfgenNotCombineScript} 
+       
 #psfenergy=1.0 \
  #      extendedsource=no modelee=yes
        
@@ -474,6 +474,7 @@ arfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits
 
 mv SpecGrp.ds {nametoreplace}.ds
        
+marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp
 
 #cd ../../../scripts
 {combine_cp_command}
@@ -515,7 +516,7 @@ mv SpecGrp.ds {nametoreplace}.ds
             <child>
               <widget class="Gtk.Label" id="label2">
                 <property name="MemberName" />
-                <property name="LabelProp" translatable="yes">Combined script</property>
+                <property name="LabelProp" translatable="yes">Generated scripts</property>
               </widget>
               <packing>
                 <property name="type">tab</property>
@@ -661,15 +662,96 @@ mv SpecGrp.ds {nametoreplace}.ds
             <child>
               <placeholder />
             </child>
-            <child>
-              <placeholder />
-            </child>
-            <child>
-              <placeholder />
-            </child>
           </widget>
           <packing>
             <property name="Position">2</property>
+            <property name="AutoSize">True</property>
+            <property name="Expand">False</property>
+            <property name="Fill">False</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="Gtk.HBox" id="hbox3">
+            <property name="MemberName" />
+            <property name="Spacing">6</property>
+            <child>
+              <widget class="Gtk.Label" id="label3">
+                <property name="MemberName" />
+                <property name="LabelProp" translatable="yes">rmfgen  EnergyMin</property>
+              </widget>
+              <packing>
+                <property name="Position">0</property>
+                <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Entry" id="rmfgenEnergyMin">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Text" translatable="yes">0.1</property>
+                <property name="IsEditable">True</property>
+                <property name="InvisibleChar">•</property>
+              </widget>
+              <packing>
+                <property name="Position">1</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Label" id="label9">
+                <property name="MemberName" />
+                <property name="LabelProp" translatable="yes">rmfgen EnergyMax</property>
+              </widget>
+              <packing>
+                <property name="Position">2</property>
+                <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Entry" id="rmfgenEnergyMax">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Text" translatable="yes">12.0</property>
+                <property name="IsEditable">True</property>
+                <property name="InvisibleChar">•</property>
+              </widget>
+              <packing>
+                <property name="Position">3</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Label" id="label8">
+                <property name="MemberName" />
+                <property name="LabelProp" translatable="yes">rmfgen nenergybins</property>
+              </widget>
+              <packing>
+                <property name="Position">4</property>
+                <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Entry" id="rmfgennenergybins">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Text" translatable="yes">2400</property>
+                <property name="IsEditable">True</property>
+                <property name="InvisibleChar">•</property>
+              </widget>
+              <packing>
+                <property name="Position">5</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="Position">3</property>
             <property name="AutoSize">True</property>
             <property name="Expand">False</property>
             <property name="Fill">False</property>
@@ -686,7 +768,7 @@ mv SpecGrp.ds {nametoreplace}.ds
           </widget>
           <packing>
             <property name="PackType">End</property>
-            <property name="Position">3</property>
+            <property name="Position">4</property>
             <property name="AutoSize">True</property>
             <property name="Expand">False</property>
             <property name="Fill">False</property>
