@@ -62,15 +62,13 @@ public partial class MainWindow : Gtk.Window
                     string ewwewe = p.StandardOutput.ReadToEnd();*/
 
 
-                    if (combine_spectracheck.Active)
-                    {
-                        psi = new System.Diagnostics.ProcessStartInfo("mkdir", "combined");
-                        psi.RedirectStandardOutput = true;
-                        psi.UseShellExecute = false;
-                        psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
-                        p = System.Diagnostics.Process.Start(psi);
-                        p.WaitForExit();
-                    }
+                    psi = new System.Diagnostics.ProcessStartInfo("mkdir", "combined");
+                    psi.RedirectStandardOutput = true;
+                    psi.UseShellExecute = false;
+                    psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
+                    p = System.Diagnostics.Process.Start(psi);
+                    p.WaitForExit();
+
 
                     List<string> filesInFolder = new List<string>();
                     filesInFolder.AddRange(tool_output.Replace("./", "").Split('\n'));
@@ -104,9 +102,10 @@ public partial class MainWindow : Gtk.Window
                             runScript(archive, spmos2textview.Buffer.Text, "spmos2.sas",
                                 mos2_name.Text?.Trim() + i.ToString(), "_mos2", copiedFiles);
                         }
+                        combined_script_textview.Buffer.Text += $"\n{i} - {archive} ";
                         i++;
                     }
-
+                    combined_script_textview.Buffer.Text += "\n";
                     // combine script
                     var script =
                      "epicspeccombine pha=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".ds")).ToArray()) + "\" \\"
@@ -180,7 +179,7 @@ public partial class MainWindow : Gtk.Window
         psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
         System.Diagnostics.Process p = System.Diagnostics.Process.Start(psi);
         p.WaitForExit();
-        string tool_output = p.StandardOutput.ReadToEnd(); 
+        string tool_output = p.StandardOutput.ReadToEnd();
         logToConsole("\n" + archive + " - begin extract");
         filesTodelete.AddRange(tool_output.Replace("./", "").Split('\n'));
 
@@ -246,16 +245,17 @@ cp {nametoreplace}.ds ../combined
             script = script.Replace("{arfgenNotCombineScript}", "");
             string acceptchanrange = (jobName == "epic" ? "acceptchanrange=yes" : "");
             script = script.Replace("{rmfgenRemainningCombineScript}",
-                $"withenergybins=yes energymin={rmfgenEnergyMin.Text} energymax={rmfgenEnergyMax.Text} nenergybins={rmfgennenergybins.Text} {acceptchanrange} " );
-        } else
+                $"withenergybins=yes energymin={rmfgenEnergyMin.Text} energymax={rmfgenEnergyMax.Text} nenergybins={rmfgennenergybins.Text} {acceptchanrange} ");
+        }
+        else
         {
             script = script.Replace("{rmfgenRemainningCombineScript}", "");
-            if (jobName== "epic") 
+            if (jobName == "epic")
             {
                 script = script.Replace("{arfgenNotCombineScript}",
                     $"badpixlocation=pn_flt_evt.fits detmaptype=psf psfenergy=1.0 extendedsource=no modelee=yes ");
             }
-            if(jobName== "_mos1") 
+            if (jobName == "_mos1")
             {
                 script = script.Replace("{arfgenNotCombineScript}",
                     $"badpixlocation=mos1_flt_evt.fits detmaptype=psf ");
@@ -276,10 +276,13 @@ cp {nametoreplace}.ds ../combined
         p = System.Diagnostics.Process.Start(psi);
         p.WaitForExit();
         logToConsole("\n" + workdir + " - processing done");
-        foreach (var file in filesTodelete)
+        if (deleteExtFiles.Active)
         {
-            if (!string.IsNullOrWhiteSpace(file) && !string.IsNullOrEmpty(file))
-                File.Delete(workdir + '/' + file);
+            foreach (var file in filesTodelete)
+            {
+                if (!string.IsNullOrWhiteSpace(file) && !string.IsNullOrEmpty(file))
+                    File.Delete(workdir + '/' + file);
+            }
         }
     }
 

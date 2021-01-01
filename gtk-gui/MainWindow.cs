@@ -57,6 +57,8 @@ public partial class MainWindow
 
 	private global::Gtk.Entry combined_spectra_name;
 
+	private global::Gtk.CheckButton deleteExtFiles;
+
 	private global::Gtk.HBox hbox3;
 
 	private global::Gtk.Label label3;
@@ -82,7 +84,7 @@ public partial class MainWindow
 		this.UIManager.InsertActionGroup(w1, 0);
 		this.AddAccelGroup(this.UIManager.AccelGroup);
 		this.Name = "MainWindow";
-		this.Title = global::Mono.Unix.Catalog.GetString("SasRunner");
+		this.Title = global::Mono.Unix.Catalog.GetString("SasRunner v0.11");
 		this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 		this.DefaultWidth = 800;
 		this.DefaultHeight = 600;
@@ -93,7 +95,8 @@ public partial class MainWindow
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.notebook1 = new global::Gtk.Notebook();
 		this.notebook1.CanFocus = true;
-		this.notebook1.CurrentPage = 3;
+		this.notebook1.Name = "notebook1";
+		this.notebook1.CurrentPage = 4;
 		// Container child notebook1.Gtk.Notebook+NotebookChild
 		this.filechooserwidget1 = new global::Gtk.FileChooserWidget(((global::Gtk.FileChooserAction)(2)));
 		this.filechooserwidget1.Name = "filechooserwidget1";
@@ -479,11 +482,22 @@ public partial class MainWindow
 		this.hbox2.Add(this.combined_spectra_name);
 		global::Gtk.Box.BoxChild w20 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.combined_spectra_name]));
 		w20.Position = 1;
-		this.vbox1.Add(this.hbox2);
-		global::Gtk.Box.BoxChild w21 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox2]));
+		// Container child hbox2.Gtk.Box+BoxChild
+		this.deleteExtFiles = new global::Gtk.CheckButton();
+		this.deleteExtFiles.CanFocus = true;
+		this.deleteExtFiles.Name = "deleteExtFiles";
+		this.deleteExtFiles.Label = global::Mono.Unix.Catalog.GetString("Delete extracted files afterwards");
+		this.deleteExtFiles.Active = true;
+		this.deleteExtFiles.DrawIndicator = true;
+		this.deleteExtFiles.UseUnderline = true;
+		this.hbox2.Add(this.deleteExtFiles);
+		global::Gtk.Box.BoxChild w21 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.deleteExtFiles]));
 		w21.Position = 2;
-		w21.Expand = false;
-		w21.Fill = false;
+		this.vbox1.Add(this.hbox2);
+		global::Gtk.Box.BoxChild w22 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox2]));
+		w22.Position = 2;
+		w22.Expand = false;
+		w22.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.hbox3 = new global::Gtk.HBox();
 		this.hbox3.Name = "hbox3";
@@ -493,10 +507,10 @@ public partial class MainWindow
 		this.label3.Name = "label3";
 		this.label3.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen  EnergyMin");
 		this.hbox3.Add(this.label3);
-		global::Gtk.Box.BoxChild w22 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label3]));
-		w22.Position = 0;
-		w22.Expand = false;
-		w22.Fill = false;
+		global::Gtk.Box.BoxChild w23 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label3]));
+		w23.Position = 0;
+		w23.Expand = false;
+		w23.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.rmfgenEnergyMin = new global::Gtk.Entry();
 		this.rmfgenEnergyMin.CanFocus = true;
@@ -505,17 +519,17 @@ public partial class MainWindow
 		this.rmfgenEnergyMin.IsEditable = true;
 		this.rmfgenEnergyMin.InvisibleChar = '•';
 		this.hbox3.Add(this.rmfgenEnergyMin);
-		global::Gtk.Box.BoxChild w23 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMin]));
-		w23.Position = 1;
+		global::Gtk.Box.BoxChild w24 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMin]));
+		w24.Position = 1;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.label9 = new global::Gtk.Label();
 		this.label9.Name = "label9";
 		this.label9.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen EnergyMax");
 		this.hbox3.Add(this.label9);
-		global::Gtk.Box.BoxChild w24 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label9]));
-		w24.Position = 2;
-		w24.Expand = false;
-		w24.Fill = false;
+		global::Gtk.Box.BoxChild w25 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label9]));
+		w25.Position = 2;
+		w25.Expand = false;
+		w25.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.rmfgenEnergyMax = new global::Gtk.Entry();
 		this.rmfgenEnergyMax.CanFocus = true;
@@ -524,17 +538,17 @@ public partial class MainWindow
 		this.rmfgenEnergyMax.IsEditable = true;
 		this.rmfgenEnergyMax.InvisibleChar = '•';
 		this.hbox3.Add(this.rmfgenEnergyMax);
-		global::Gtk.Box.BoxChild w25 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMax]));
-		w25.Position = 3;
+		global::Gtk.Box.BoxChild w26 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMax]));
+		w26.Position = 3;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.label8 = new global::Gtk.Label();
 		this.label8.Name = "label8";
 		this.label8.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen nenergybins");
 		this.hbox3.Add(this.label8);
-		global::Gtk.Box.BoxChild w26 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label8]));
-		w26.Position = 4;
-		w26.Expand = false;
-		w26.Fill = false;
+		global::Gtk.Box.BoxChild w27 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label8]));
+		w27.Position = 4;
+		w27.Expand = false;
+		w27.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.rmfgennenergybins = new global::Gtk.Entry();
 		this.rmfgennenergybins.CanFocus = true;
@@ -543,13 +557,13 @@ public partial class MainWindow
 		this.rmfgennenergybins.IsEditable = true;
 		this.rmfgennenergybins.InvisibleChar = '•';
 		this.hbox3.Add(this.rmfgennenergybins);
-		global::Gtk.Box.BoxChild w27 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgennenergybins]));
-		w27.Position = 5;
+		global::Gtk.Box.BoxChild w28 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgennenergybins]));
+		w28.Position = 5;
 		this.vbox1.Add(this.hbox3);
-		global::Gtk.Box.BoxChild w28 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox3]));
-		w28.Position = 3;
-		w28.Expand = false;
-		w28.Fill = false;
+		global::Gtk.Box.BoxChild w29 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox3]));
+		w29.Position = 3;
+		w29.Expand = false;
+		w29.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.button2 = new global::Gtk.Button();
 		this.button2.CanFocus = true;
@@ -557,11 +571,11 @@ public partial class MainWindow
 		this.button2.UseUnderline = true;
 		this.button2.Label = global::Mono.Unix.Catalog.GetString("Generate");
 		this.vbox1.Add(this.button2);
-		global::Gtk.Box.BoxChild w29 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.button2]));
-		w29.PackType = ((global::Gtk.PackType)(1));
-		w29.Position = 4;
-		w29.Expand = false;
-		w29.Fill = false;
+		global::Gtk.Box.BoxChild w30 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.button2]));
+		w30.PackType = ((global::Gtk.PackType)(1));
+		w30.Position = 4;
+		w30.Expand = false;
+		w30.Fill = false;
 		this.Add(this.vbox1);
 		if ((this.Child != null))
 		{

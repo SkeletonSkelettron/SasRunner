@@ -9,7 +9,7 @@
   <widget class="Gtk.Window" id="MainWindow" design-size="947 638">
     <action-group name="Default" />
     <property name="MemberName" />
-    <property name="Title" translatable="yes">SasRunner</property>
+    <property name="Title" translatable="yes">SasRunner v0.11</property>
     <property name="WindowPosition">CenterOnParent</property>
     <property name="DefaultWidth">800</property>
     <property name="DefaultHeight">600</property>
@@ -22,7 +22,7 @@
           <widget class="Gtk.Notebook" id="notebook1">
             <property name="MemberName" />
             <property name="CanFocus">True</property>
-            <property name="CurrentPage">3</property>
+            <property name="CurrentPage">4</property>
             <child>
               <widget class="Gtk.FileChooserWidget" id="filechooserwidget1">
                 <property name="MemberName" />
@@ -657,7 +657,19 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
               </packing>
             </child>
             <child>
-              <placeholder />
+              <widget class="Gtk.CheckButton" id="deleteExtFiles">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="Label" translatable="yes">Delete extracted files afterwards</property>
+                <property name="Active">True</property>
+                <property name="DrawIndicator">True</property>
+                <property name="HasLabel">True</property>
+                <property name="UseUnderline">True</property>
+              </widget>
+              <packing>
+                <property name="Position">2</property>
+                <property name="AutoSize">True</property>
+              </packing>
             </child>
             <child>
               <placeholder />
