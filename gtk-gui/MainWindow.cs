@@ -84,7 +84,7 @@ public partial class MainWindow
 		this.UIManager.InsertActionGroup(w1, 0);
 		this.AddAccelGroup(this.UIManager.AccelGroup);
 		this.Name = "MainWindow";
-		this.Title = global::Mono.Unix.Catalog.GetString("SasRunner v0.11");
+		this.Title = global::Mono.Unix.Catalog.GetString("SasRunner v0.12");
 		this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 		this.DefaultWidth = 800;
 		this.DefaultHeight = 600;
