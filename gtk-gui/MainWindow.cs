@@ -59,6 +59,8 @@ public partial class MainWindow
 
 	private global::Gtk.CheckButton deleteExtFiles;
 
+	private global::Gtk.CheckButton threadedRun;
+
 	private global::Gtk.HBox hbox3;
 
 	private global::Gtk.Label label3;
@@ -84,7 +86,7 @@ public partial class MainWindow
 		this.UIManager.InsertActionGroup(w1, 0);
 		this.AddAccelGroup(this.UIManager.AccelGroup);
 		this.Name = "MainWindow";
-		this.Title = global::Mono.Unix.Catalog.GetString("SasRunner v0.12");
+		this.Title = global::Mono.Unix.Catalog.GetString("SasRunner v0.16");
 		this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 		this.DefaultWidth = 800;
 		this.DefaultHeight = 600;
@@ -96,7 +98,7 @@ public partial class MainWindow
 		this.notebook1 = new global::Gtk.Notebook();
 		this.notebook1.CanFocus = true;
 		this.notebook1.Name = "notebook1";
-		this.notebook1.CurrentPage = 4;
+		this.notebook1.CurrentPage = 0;
 		// Container child notebook1.Gtk.Notebook+NotebookChild
 		this.filechooserwidget1 = new global::Gtk.FileChooserWidget(((global::Gtk.FileChooserAction)(2)));
 		this.filechooserwidget1.Name = "filechooserwidget1";
@@ -283,75 +285,75 @@ public partial class MainWindow
 		this.GtkScrolledWindow2.ShadowType = ((global::Gtk.ShadowType)(1));
 		// Container child GtkScrolledWindow2.Gtk.Container+ContainerChild
 		this.spmos2textview = new global::Gtk.TextView();
-		this.spmos2textview.Buffer.Text = global::Mono.Unix.Catalog.GetString("9#!/bin/bash\n# need to enable SAS first!\n. setsas.sh\n\nexport SAS_ODF={sas_odf_dir" +
-				"}/\ncifbuild\nexport SAS_CCF={sas_odf_dir}/ccf.cif\nodfingest\nSUMFILE=( *SUM.SAS)\nS" +
-				"AS_ODF=$SUMFILE\nexport SAS_ODF\nemproc\n\nPNEVFILE=( *EMOS2*ImagingEvts.ds)\ncp -f $" +
-				"PNEVFILE mos2_evt.fits\nds9 $PNEVFILE\n\n#------------------------------------- Edi" +
-				"t here ---------\nTARGET=\"RXJ0420\"                  #---- target ID\nEBAND=\"(PI in" +
-				" [150:12000])\"      #---- Energy band\nSRCREGFILE=\"mos2src.reg\"           #---- S" +
-				"ource reg file\nBKGREGFILE=\"mos2bkg.reg\"           #---- Background reg file\nTHRE" +
-				"SHOLD=0.35                    #---- Threshold for GTI filtering\n#---------------" +
-				"------------------------------------------\n\nshopt -s nullglob\n\n#------- Go to re" +
-				"duction dir where ccf.cif and SUMMARY file are located ----------\n#cd {workingdi" +
-				"r}\n\n#------- Set environment variables SAS_CCF and SAS_ODF (observation-specific" +
-				") ----\nSAS_CCF=ccf.cif ; export SAS_CCF\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE ; e" +
-				"xport SAS_ODF\n\n#------- Get ObsID and satellite revolution from the SUMMARY file" +
-				" ----------------\nOBSID=`grep \'/ Observation Identifier\' < $SUMFILE | awk \'{prin" +
-				"t $1}\'`\nREV=`grep \'/ Revolution Identifier\' < $SUMFILE | awk \'{print $1}\'`\n\n#---" +
-				"---- Get source and background coordinates from reg files --------------------\na" +
-				"wk \'BEGIN{FS = \"(\"};/circle/{print $2}\' $SRCREGFILE > toto\nSRCREGCOORD=`awk \'BEG" +
-				"IN{FS = \")\"};{print $1}\' toto`\nawk \'BEGIN{FS = \"(\"};/circle/{print $2}\' $BKGREGF" +
-				"ILE > toto\nBKGREGCOORD=`awk \'BEGIN{FS = \")\"};{print $1}\' toto`\nrm -f toto\nSRCREG" +
-				"=\"((X,Y) in circle($SRCREGCOORD))\"\nBKGREG=\"((X,Y) in circle($BKGREGCOORD))\"\n\n#--" +
-				"----- Find pn event list to work with and copy it to spec dir -----------------\n" +
-				"\n#cp -f $PNEVFILE ../spectra\n\n#------- Change to spec directory ----------------" +
-				"--------------------------------\n#cd ../spectra\n\n#------- Copy event file ------" +
-				"---------------------------------------------------\n\n\n#------- Keep a record of " +
-				"the SAS version of the analysis in the directory -------\nsasversion > \"sasvers.r" +
-				"ead\"\n\n#------- Filter periods of high background -------------------------------" +
-				"--------\nevselect table=mos2_evt.fits withrateset=yes rateset=mos2_bkgrate.fits " +
-				"timecolumn=TIME \\\n         maketimecolumn=yes timebinsize=100 makeratecolumn=yes" +
-				" \\\n         expression=\'#XMMEA_EM && (PI>10000) && (PATTERN==0)\'\n\n#------- Plot " +
-				"background light curve ---------------------------------------------\ndsplot tabl" +
-				"e=mos2_bkgrate.fits x=TIME y=RATE\n\n#------- Generate GTI -----------------------" +
-				"-------------------------------------\n#tabgtigen table=pn_bkgrate.fits gtiset=pn" +
-				"_bkggti.fits expression=\'RATE<=$THRESHOLD\'\n\ntabgtigen table=mos2_bkgrate.fits ex" +
-				"pression=\'RATE<=0.35\' gtiset=mos2_bkggti.fits \n\n#------- Filter event file with " +
-				"GTI ----------------------------------------------\nevselect table=mos2_evt.fits " +
-				"withfilteredset=yes filteredset=mos2_flt_evt.fits \\\n         destruct=yes keepfi" +
-				"lteroutput=yes \\\n\t expression=\'#XMMEA_EM && gti(mos2_bkggti.fits,TIME) && (PI>15" +
-				"0)\'\n\n#------- Examine filtered file --------------------------------------------" +
-				"-------\nevselect table=mos2_flt_evt.fits withrateset=yes rateset=mos2_bkgrate_fl" +
-				"t.fits timecolumn=TIME \\\n         timebinsize=100 makeratecolumn=yes maketimecol" +
-				"umn=yes \\\n         expression=\'(PI>10000) && (PATTERN==0) && #XMMEA_EM\'\ndsplot t" +
-				"able=mos2_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE\n\n#------- Crea" +
-				"te the source spectrum ----------------------------------------------\nevselect t" +
-				"able=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_spec.fits \\\n        " +
-				" energycolumn=PI spectralbinsize=5 {withspecranges} \\\n\t specchannelmin=0 speccha" +
-				"nnelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0) && (PATTERN<=12) && $SRCREG" +
-				" && $EBAND\"\n\n#------- Create the background spectrum ---------------------------" +
-				"---------------\nevselect table=mos2_flt_evt.fits withspectrumset=yes spectrumset" +
-				"=mos2_bkg_spec.fits \\\n         energycolumn=PI spectralbinsize=5 {withspecranges" +
-				"} \\\n\t specchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==" +
-				"0) && (PATTERN<=12) && $BKGREG && $EBAND\"\n\n#------- Compute areas of source/back" +
-				"ground spectra ------------------------------\nbackscale spectrumset=mos2_spec.fi" +
-				"ts badpixlocation=mos2_flt_evt.fits\nbackscale spectrumset=mos2_bkg_spec.fits bad" +
-				"pixlocation=mos2_flt_evt.fits\n\n#------- Create response matrix and ancillary fil" +
-				"e -------------------------------\nrmfgen spectrumset=mos2_spec.fits rmfset=mos2." +
-				"rmf {rmfgenRemainningCombineScript}\narfgen spectrumset=mos2_spec.fits arfset=mos" +
-				"2.arf withrmfset=yes rmfset=mos2.rmf {arfgenNotCombineScript} \n       \n#psfenerg" +
-				"y=1.0 \\\n #      extendedsource=no modelee=yes\n       \n#------- Copy files ------" +
-				"--------------------------------------------------------\ncp -f mos2_spec.fits {n" +
-				"ametoreplace}_spec.fits\ncp -f mos2_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f " +
-				"mos2.rmf {nametoreplace}.rmf\ncp -f mos2.arf {nametoreplace}.arf\n\nspecgroup spect" +
-				"rumset={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace" +
-				"}.rmf \\\narfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\n#mv Spe" +
-				"cGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\n#specgroup spectrumset=RXJ0420_065147020" +
-				"1_mos2_spec.fits mincounts=20 rmfset=RXJ0420_0651470201_mos2.rmf \\\n#arfset=RXJ04" +
-				"20_0651470201_mos2.arf backgndset=RXJ0420_0651470201_mos2_bkg_spec.fits \n\nmv Spe" +
-				"cGrp.ds {nametoreplace}.ds\n       \nmarfrmf rmfil={nametoreplace}.rmf arfil={name" +
-				"toreplace}.arf outfil={nametoreplace}.rsp\n\n#cd ../../../scripts\n{combine_cp_comm" +
-				"and}\n");
+		this.spmos2textview.Buffer.Text = global::Mono.Unix.Catalog.GetString("#!/bin/bash\n# need to enable SAS first!\n. setsas.sh\n\nexport SAS_ODF={sas_odf_dir}" +
+				"/\ncifbuild\nexport SAS_CCF={sas_odf_dir}/ccf.cif\nodfingest\nSUMFILE=( *SUM.SAS)\nSA" +
+				"S_ODF=$SUMFILE\nexport SAS_ODF\nemproc\n\nPNEVFILE=( *EMOS2*ImagingEvts.ds)\ncp -f $P" +
+				"NEVFILE mos2_evt.fits\nds9 $PNEVFILE\n\n#------------------------------------- Edit" +
+				" here ---------\nTARGET=\"RXJ0420\"                  #---- target ID\nEBAND=\"(PI in " +
+				"[150:12000])\"      #---- Energy band\nSRCREGFILE=\"mos2src.reg\"           #---- So" +
+				"urce reg file\nBKGREGFILE=\"mos2bkg.reg\"           #---- Background reg file\nTHRES" +
+				"HOLD=0.35                    #---- Threshold for GTI filtering\n#----------------" +
+				"-----------------------------------------\n\nshopt -s nullglob\n\n#------- Go to red" +
+				"uction dir where ccf.cif and SUMMARY file are located ----------\n#cd {workingdir" +
+				"}\n\n#------- Set environment variables SAS_CCF and SAS_ODF (observation-specific)" +
+				" ----\nSAS_CCF=ccf.cif ; export SAS_CCF\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE ; ex" +
+				"port SAS_ODF\n\n#------- Get ObsID and satellite revolution from the SUMMARY file " +
+				"----------------\nOBSID=`grep \'/ Observation Identifier\' < $SUMFILE | awk \'{print" +
+				" $1}\'`\nREV=`grep \'/ Revolution Identifier\' < $SUMFILE | awk \'{print $1}\'`\n\n#----" +
+				"--- Get source and background coordinates from reg files --------------------\naw" +
+				"k \'BEGIN{FS = \"(\"};/circle/{print $2}\' $SRCREGFILE > toto\nSRCREGCOORD=`awk \'BEGI" +
+				"N{FS = \")\"};{print $1}\' toto`\nawk \'BEGIN{FS = \"(\"};/circle/{print $2}\' $BKGREGFI" +
+				"LE > toto\nBKGREGCOORD=`awk \'BEGIN{FS = \")\"};{print $1}\' toto`\nrm -f toto\nSRCREG=" +
+				"\"((X,Y) in circle($SRCREGCOORD))\"\nBKGREG=\"((X,Y) in circle($BKGREGCOORD))\"\n\n#---" +
+				"---- Find pn event list to work with and copy it to spec dir -----------------\n\n" +
+				"#cp -f $PNEVFILE ../spectra\n\n#------- Change to spec directory -----------------" +
+				"-------------------------------\n#cd ../spectra\n\n#------- Copy event file -------" +
+				"--------------------------------------------------\n\n\n#------- Keep a record of t" +
+				"he SAS version of the analysis in the directory -------\nsasversion > \"sasvers.re" +
+				"ad\"\n\n#------- Filter periods of high background --------------------------------" +
+				"-------\nevselect table=mos2_evt.fits withrateset=yes rateset=mos2_bkgrate.fits t" +
+				"imecolumn=TIME \\\n         maketimecolumn=yes timebinsize=100 makeratecolumn=yes " +
+				"\\\n         expression=\'#XMMEA_EM && (PI>10000) && (PATTERN==0)\'\n\n#------- Plot b" +
+				"ackground light curve ---------------------------------------------\ndsplot table" +
+				"=mos2_bkgrate.fits x=TIME y=RATE\n\n#------- Generate GTI ------------------------" +
+				"------------------------------------\n#tabgtigen table=pn_bkgrate.fits gtiset=pn_" +
+				"bkggti.fits expression=\'RATE<=$THRESHOLD\'\n\ntabgtigen table=mos2_bkgrate.fits exp" +
+				"ression=\'RATE<=0.35\' gtiset=mos2_bkggti.fits \n\n#------- Filter event file with G" +
+				"TI ----------------------------------------------\nevselect table=mos2_evt.fits w" +
+				"ithfilteredset=yes filteredset=mos2_flt_evt.fits \\\n         destruct=yes keepfil" +
+				"teroutput=yes \\\n\t expression=\'#XMMEA_EM && gti(mos2_bkggti.fits,TIME) && (PI>150" +
+				")\'\n\n#------- Examine filtered file ---------------------------------------------" +
+				"------\nevselect table=mos2_flt_evt.fits withrateset=yes rateset=mos2_bkgrate_flt" +
+				".fits timecolumn=TIME \\\n         timebinsize=100 makeratecolumn=yes maketimecolu" +
+				"mn=yes \\\n         expression=\'(PI>10000) && (PATTERN==0) && #XMMEA_EM\'\ndsplot ta" +
+				"ble=mos2_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE\n\n#------- Creat" +
+				"e the source spectrum ----------------------------------------------\nevselect ta" +
+				"ble=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_spec.fits \\\n         " +
+				"energycolumn=PI spectralbinsize=5 {withspecranges} \\\n\t specchannelmin=0 specchan" +
+				"nelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0) && (PATTERN<=12) && $SRCREG " +
+				"&& $EBAND\"\n\n#------- Create the background spectrum ----------------------------" +
+				"--------------\nevselect table=mos2_flt_evt.fits withspectrumset=yes spectrumset=" +
+				"mos2_bkg_spec.fits \\\n         energycolumn=PI spectralbinsize=5 {withspecranges}" +
+				" \\\n\t specchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0" +
+				") && (PATTERN<=12) && $BKGREG && $EBAND\"\n\n#------- Compute areas of source/backg" +
+				"round spectra ------------------------------\nbackscale spectrumset=mos2_spec.fit" +
+				"s badpixlocation=mos2_flt_evt.fits\nbackscale spectrumset=mos2_bkg_spec.fits badp" +
+				"ixlocation=mos2_flt_evt.fits\n\n#------- Create response matrix and ancillary file" +
+				" -------------------------------\nrmfgen spectrumset=mos2_spec.fits rmfset=mos2.r" +
+				"mf {rmfgenRemainningCombineScript}\narfgen spectrumset=mos2_spec.fits arfset=mos2" +
+				".arf withrmfset=yes rmfset=mos2.rmf {arfgenNotCombineScript} \n       \n#psfenergy" +
+				"=1.0 \\\n #      extendedsource=no modelee=yes\n       \n#------- Copy files -------" +
+				"-------------------------------------------------------\ncp -f mos2_spec.fits {na" +
+				"metoreplace}_spec.fits\ncp -f mos2_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f m" +
+				"os2.rmf {nametoreplace}.rmf\ncp -f mos2.arf {nametoreplace}.arf\n\nspecgroup spectr" +
+				"umset={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace}" +
+				".rmf \\\narfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\n#mv Spec" +
+				"Grp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\n#specgroup spectrumset=RXJ0420_0651470201" +
+				"_mos2_spec.fits mincounts=20 rmfset=RXJ0420_0651470201_mos2.rmf \\\n#arfset=RXJ042" +
+				"0_0651470201_mos2.arf backgndset=RXJ0420_0651470201_mos2_bkg_spec.fits \n\nmv Spec" +
+				"Grp.ds {nametoreplace}.ds\n       \nmarfrmf rmfil={nametoreplace}.rmf arfil={namet" +
+				"oreplace}.arf outfil={nametoreplace}.rsp\n\n#cd ../../../scripts\n{combine_cp_comma" +
+				"nd}\n");
 		this.spmos2textview.CanFocus = true;
 		this.spmos2textview.Name = "spmos2textview";
 		this.GtkScrolledWindow2.Add(this.spmos2textview);
@@ -484,6 +486,10 @@ public partial class MainWindow
 		w20.Position = 1;
 		// Container child hbox2.Gtk.Box+BoxChild
 		this.deleteExtFiles = new global::Gtk.CheckButton();
+		global::Gtk.Tooltips w21 = new Gtk.Tooltips();
+		w21.SetTip(this.deleteExtFiles, "Deleting of extracted files is undesired in some scenario, for example - when we " +
+				"need to generate rgs spectra. It needs archive files to exist.", "Deleting of extracted files is undesired in some scenario, for example - when we " +
+				"need to generate rgs spectra. It needs archive files to exist.");
 		this.deleteExtFiles.CanFocus = true;
 		this.deleteExtFiles.Name = "deleteExtFiles";
 		this.deleteExtFiles.Label = global::Mono.Unix.Catalog.GetString("Delete extracted files afterwards");
@@ -491,13 +497,26 @@ public partial class MainWindow
 		this.deleteExtFiles.DrawIndicator = true;
 		this.deleteExtFiles.UseUnderline = true;
 		this.hbox2.Add(this.deleteExtFiles);
-		global::Gtk.Box.BoxChild w21 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.deleteExtFiles]));
-		w21.Position = 2;
-		this.vbox1.Add(this.hbox2);
-		global::Gtk.Box.BoxChild w22 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox2]));
+		global::Gtk.Box.BoxChild w22 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.deleteExtFiles]));
 		w22.Position = 2;
-		w22.Expand = false;
-		w22.Fill = false;
+		// Container child hbox2.Gtk.Box+BoxChild
+		this.threadedRun = new global::Gtk.CheckButton();
+		w21.SetTip(this.threadedRun, "Threaded run increases chance of program crash, but program is responsive when wo" +
+				"rking.\nIf crash occures, try run program without threading enabled.", "Threaded run increases chance of program crash, but program is responsive when wo" +
+				"rking.\nIf crash occures, try run program without threading enabled.");
+		this.threadedRun.CanFocus = true;
+		this.threadedRun.Name = "threadedRun";
+		this.threadedRun.Label = global::Mono.Unix.Catalog.GetString("Run threaded");
+		this.threadedRun.DrawIndicator = true;
+		this.threadedRun.UseUnderline = true;
+		this.hbox2.Add(this.threadedRun);
+		global::Gtk.Box.BoxChild w23 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.threadedRun]));
+		w23.Position = 3;
+		this.vbox1.Add(this.hbox2);
+		global::Gtk.Box.BoxChild w24 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox2]));
+		w24.Position = 2;
+		w24.Expand = false;
+		w24.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.hbox3 = new global::Gtk.HBox();
 		this.hbox3.Name = "hbox3";
@@ -507,63 +526,78 @@ public partial class MainWindow
 		this.label3.Name = "label3";
 		this.label3.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen  EnergyMin");
 		this.hbox3.Add(this.label3);
-		global::Gtk.Box.BoxChild w23 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label3]));
-		w23.Position = 0;
-		w23.Expand = false;
-		w23.Fill = false;
+		global::Gtk.Box.BoxChild w25 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label3]));
+		w25.Position = 0;
+		w25.Expand = false;
+		w25.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.rmfgenEnergyMin = new global::Gtk.Entry();
+		w21.SetTip(this.rmfgenEnergyMin, "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
+				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
+				"_01.rmf \\\n   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 ", "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
+				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
+				"_01.rmf \\\n   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 ");
 		this.rmfgenEnergyMin.CanFocus = true;
 		this.rmfgenEnergyMin.Name = "rmfgenEnergyMin";
 		this.rmfgenEnergyMin.Text = global::Mono.Unix.Catalog.GetString("0.1");
 		this.rmfgenEnergyMin.IsEditable = true;
 		this.rmfgenEnergyMin.InvisibleChar = '•';
 		this.hbox3.Add(this.rmfgenEnergyMin);
-		global::Gtk.Box.BoxChild w24 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMin]));
-		w24.Position = 1;
+		global::Gtk.Box.BoxChild w26 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMin]));
+		w26.Position = 1;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.label9 = new global::Gtk.Label();
 		this.label9.Name = "label9";
 		this.label9.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen EnergyMax");
 		this.hbox3.Add(this.label9);
-		global::Gtk.Box.BoxChild w25 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label9]));
-		w25.Position = 2;
-		w25.Expand = false;
-		w25.Fill = false;
+		global::Gtk.Box.BoxChild w27 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label9]));
+		w27.Position = 2;
+		w27.Expand = false;
+		w27.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.rmfgenEnergyMax = new global::Gtk.Entry();
+		w21.SetTip(this.rmfgenEnergyMax, "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
+				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
+				"_01.rmf \\\n   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 ", "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
+				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
+				"_01.rmf \\\n   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 ");
 		this.rmfgenEnergyMax.CanFocus = true;
 		this.rmfgenEnergyMax.Name = "rmfgenEnergyMax";
 		this.rmfgenEnergyMax.Text = global::Mono.Unix.Catalog.GetString("12.0");
 		this.rmfgenEnergyMax.IsEditable = true;
 		this.rmfgenEnergyMax.InvisibleChar = '•';
 		this.hbox3.Add(this.rmfgenEnergyMax);
-		global::Gtk.Box.BoxChild w26 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMax]));
-		w26.Position = 3;
+		global::Gtk.Box.BoxChild w28 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMax]));
+		w28.Position = 3;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.label8 = new global::Gtk.Label();
 		this.label8.Name = "label8";
 		this.label8.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen nenergybins");
 		this.hbox3.Add(this.label8);
-		global::Gtk.Box.BoxChild w27 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label8]));
-		w27.Position = 4;
-		w27.Expand = false;
-		w27.Fill = false;
+		global::Gtk.Box.BoxChild w29 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label8]));
+		w29.Position = 4;
+		w29.Expand = false;
+		w29.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.rmfgennenergybins = new global::Gtk.Entry();
+		w21.SetTip(this.rmfgennenergybins, "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
+				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
+				"_01.rmf \\\n   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 ", "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
+				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
+				"_01.rmf \\\n   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 ");
 		this.rmfgennenergybins.CanFocus = true;
 		this.rmfgennenergybins.Name = "rmfgennenergybins";
 		this.rmfgennenergybins.Text = global::Mono.Unix.Catalog.GetString("2400");
 		this.rmfgennenergybins.IsEditable = true;
 		this.rmfgennenergybins.InvisibleChar = '•';
 		this.hbox3.Add(this.rmfgennenergybins);
-		global::Gtk.Box.BoxChild w28 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgennenergybins]));
-		w28.Position = 5;
+		global::Gtk.Box.BoxChild w30 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgennenergybins]));
+		w30.Position = 5;
 		this.vbox1.Add(this.hbox3);
-		global::Gtk.Box.BoxChild w29 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox3]));
-		w29.Position = 3;
-		w29.Expand = false;
-		w29.Fill = false;
+		global::Gtk.Box.BoxChild w31 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox3]));
+		w31.Position = 3;
+		w31.Expand = false;
+		w31.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.button2 = new global::Gtk.Button();
 		this.button2.CanFocus = true;
@@ -571,11 +605,11 @@ public partial class MainWindow
 		this.button2.UseUnderline = true;
 		this.button2.Label = global::Mono.Unix.Catalog.GetString("Generate");
 		this.vbox1.Add(this.button2);
-		global::Gtk.Box.BoxChild w30 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.button2]));
-		w30.PackType = ((global::Gtk.PackType)(1));
-		w30.Position = 4;
-		w30.Expand = false;
-		w30.Fill = false;
+		global::Gtk.Box.BoxChild w32 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.button2]));
+		w32.PackType = ((global::Gtk.PackType)(1));
+		w32.Position = 4;
+		w32.Expand = false;
+		w32.Fill = false;
 		this.Add(this.vbox1);
 		if ((this.Child != null))
 		{

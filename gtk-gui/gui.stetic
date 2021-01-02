@@ -9,7 +9,7 @@
   <widget class="Gtk.Window" id="MainWindow" design-size="947 638">
     <action-group name="Default" />
     <property name="MemberName" />
-    <property name="Title" translatable="yes">SasRunner v0.12</property>
+    <property name="Title" translatable="yes">SasRunner v0.16</property>
     <property name="WindowPosition">CenterOnParent</property>
     <property name="DefaultWidth">800</property>
     <property name="DefaultHeight">600</property>
@@ -22,7 +22,7 @@
           <widget class="Gtk.Notebook" id="notebook1">
             <property name="MemberName" />
             <property name="CanFocus">True</property>
-            <property name="CurrentPage">4</property>
+            <property name="CurrentPage">0</property>
             <child>
               <widget class="Gtk.FileChooserWidget" id="filechooserwidget1">
                 <property name="MemberName" />
@@ -350,7 +350,7 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
                     <property name="MemberName" />
                     <property name="CanFocus">True</property>
                     <property name="ShowScrollbars">True</property>
-                    <property name="Text" translatable="yes">9#!/bin/bash
+                    <property name="Text" translatable="yes">#!/bin/bash
 # need to enable SAS first!
 . setsas.sh
 
@@ -659,6 +659,7 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
             <child>
               <widget class="Gtk.CheckButton" id="deleteExtFiles">
                 <property name="MemberName" />
+                <property name="Tooltip" translatable="yes">Deleting of extracted files is undesired in some scenario, for example - when we need to generate rgs spectra. It needs archive files to exist.</property>
                 <property name="CanFocus">True</property>
                 <property name="Label" translatable="yes">Delete extracted files afterwards</property>
                 <property name="Active">True</property>
@@ -672,7 +673,20 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
               </packing>
             </child>
             <child>
-              <placeholder />
+              <widget class="Gtk.CheckButton" id="threadedRun">
+                <property name="MemberName" />
+                <property name="Tooltip" translatable="yes">Threaded run increases chance of program crash, but program is responsive when working.
+If crash occures, try run program without threading enabled.</property>
+                <property name="CanFocus">True</property>
+                <property name="Label" translatable="yes">Run threaded</property>
+                <property name="DrawIndicator">True</property>
+                <property name="HasLabel">True</property>
+                <property name="UseUnderline">True</property>
+              </widget>
+              <packing>
+                <property name="Position">3</property>
+                <property name="AutoSize">True</property>
+              </packing>
             </child>
           </widget>
           <packing>
@@ -701,6 +715,10 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
             <child>
               <widget class="Gtk.Entry" id="rmfgenEnergyMin">
                 <property name="MemberName" />
+                <property name="Tooltip" translatable="yes">This parameter is needed for combine scenario case, when rmfgen is run by different params than usual case
+
+rmfgen spectrumset=src_spectrum_01.ds rmfset=response_01.rmf \
+   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 </property>
                 <property name="CanFocus">True</property>
                 <property name="Text" translatable="yes">0.1</property>
                 <property name="IsEditable">True</property>
@@ -726,6 +744,10 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
             <child>
               <widget class="Gtk.Entry" id="rmfgenEnergyMax">
                 <property name="MemberName" />
+                <property name="Tooltip" translatable="yes">This parameter is needed for combine scenario case, when rmfgen is run by different params than usual case
+
+rmfgen spectrumset=src_spectrum_01.ds rmfset=response_01.rmf \
+   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 </property>
                 <property name="CanFocus">True</property>
                 <property name="Text" translatable="yes">12.0</property>
                 <property name="IsEditable">True</property>
@@ -751,6 +773,10 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
             <child>
               <widget class="Gtk.Entry" id="rmfgennenergybins">
                 <property name="MemberName" />
+                <property name="Tooltip" translatable="yes">This parameter is needed for combine scenario case, when rmfgen is run by different params than usual case
+
+rmfgen spectrumset=src_spectrum_01.ds rmfset=response_01.rmf \
+   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 </property>
                 <property name="CanFocus">True</property>
                 <property name="Text" translatable="yes">2400</property>
                 <property name="IsEditable">True</property>

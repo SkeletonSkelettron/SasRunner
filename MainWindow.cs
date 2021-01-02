@@ -36,119 +36,119 @@ public partial class MainWindow : Gtk.Window
         {
             ShowDialog("This program works only and if only setsas.sh script could be run from any place." +
                     "if it does not, then add it to the path.");
-            Thread t = new Thread(new ThreadStart(() =>
+
+            if (threadedRun.Active)
             {
-                var watch = System.Diagnostics.Stopwatch.StartNew();
-                try
-                {
-
-                    List<string> copiedFiles = new List<string>();
-                    System.Diagnostics.ProcessStartInfo psi
-                            = new System.Diagnostics.ProcessStartInfo("find", "-type f -name \"*.tar.gz\"");
-                    psi.RedirectStandardOutput = true;
-                    psi.UseShellExecute = false;
-                    psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
-                    System.Diagnostics.Process p = System.Diagnostics.Process.Start(psi);
-                    p.WaitForExit();
-                    string tool_output = p.StandardOutput.ReadToEnd();
-
-                    /*psi = new System.Diagnostics.ProcessStartInfo("cp", "s f");
-                    psi.RedirectStandardInput = true;
-                    psi.RedirectStandardOutput = true;
-                    psi.UseShellExecute = false;
-                    psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
-                    p = System.Diagnostics.Process.Start(psi);
-                    p.WaitForExit(); 
-                    string ewwewe = p.StandardOutput.ReadToEnd();*/
-
-
-                    psi = new System.Diagnostics.ProcessStartInfo("mkdir", "combined");
-                    psi.RedirectStandardOutput = true;
-                    psi.UseShellExecute = false;
-                    psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
-                    p = System.Diagnostics.Process.Start(psi);
-                    p.WaitForExit();
-
-
-                    List<string> filesInFolder = new List<string>();
-                    filesInFolder.AddRange(tool_output.Replace("./", "").Split('\n'));
-                    filesInFolder.RemoveAll(x => string.IsNullOrEmpty(x));
-                    var fileNewTar = p.StandardOutput.ReadToEnd();
-                    var fNN = fileNewTar.Replace("./", "").Replace("\n", "");
-                    int i = 0;
-                    foreach (var archive in filesInFolder)
-                    {
-                        var dir = archive.Replace(".tar.gz", "");
-                        psi = new System.Diagnostics.ProcessStartInfo("mkdir", dir);
-                        psi.RedirectStandardOutput = true;
-                        psi.UseShellExecute = false;
-                        psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
-                        p = System.Diagnostics.Process.Start(psi);
-                        p.WaitForExit();
-
-
-                        if (epic_check.Active)
-                        {
-                            runScript(archive, spectra_textview.Buffer.Text, "spectra.sas",
-                                epic_name.Text?.Trim() + i.ToString(), "epic", copiedFiles);
-                        }
-                        if (mos1check.Active)
-                        {
-                            runScript(archive, spmos1textview.Buffer.Text, "spmos1.sas",
-                                mos1_name.Text?.Trim() + i.ToString(), "_mos1", copiedFiles);
-                        }
-                        if (mos2check.Active)
-                        {
-                            runScript(archive, spmos2textview.Buffer.Text, "spmos2.sas",
-                                mos2_name.Text?.Trim() + i.ToString(), "_mos2", copiedFiles);
-                        }
-                        combined_script_textview.Buffer.Text += $"\n{i} - {archive} ";
-                        i++;
-                    }
-                    combined_script_textview.Buffer.Text += "\n";
-                    // combine script
-                    var script =
-                     "epicspeccombine pha=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".ds")).ToArray()) + "\" \\"
-                    + "\nbkg=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains("bkg.fits")).ToArray()) + "\" \\"
-                    + "\nrmf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".rmf")).ToArray()) + "\" \\"
-                    + "\narf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".arf")).ToArray()) + "\" \\"
-                    + "\nfilepha=\"{name}_src_grp.ds\" filebkg=\"{name}_bkg_grp.bkg\" filersp=\"{name}_resp_grp.rmf\""
-                    .Replace("{name}", combined_spectra_name.Text?.Trim());
-
-                    combined_script_textview.Buffer.Text = script;
-
-                    // rimraf
-                    script =
-                     "epicspeccombine pha=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".ds")).ToArray()) + "\" \\"
-                    + "\nbkg=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains("bkg.fits")).ToArray()) + "\" \\"
-                    + "\nrmf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".rmf")).ToArray()) + "\" \\"
-                    + "\narf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".arf")).ToArray()) + "\" \\"
-                    + "\nfilepha=\"{name}_src_grp.ds\" filebkg=\"{name}_bkg_grp.bkg\" filersp=\"{name}_resp_grp.rmf\""
-                    .Replace("{name}", combined_spectra_name.Text?.Trim());
-
-                    combined_script_textview.Buffer.Text = script;
-
-
-                    logToConsole("combination script");
-                    logToConsole(script);
-
-
-
-                    watch.Stop();
-                    var elapsedS = (watch.ElapsedMilliseconds) / 1000;
-                    ShowDialog("All jobs done\n processing time: " + (elapsedS / 60).ToString() + " minutes");
-                    button2.Sensitive = true;
-                }
-                catch (Exception ex)
-                {
-
-                    ShowDialog(ex.Message);
-                }
-
-            }));
-            t.Start();
+                Thread t = new Thread(new ThreadStart(mainWorker));
+                t.Start();
+            } 
+            else
+            {
+                mainWorker();
+            }
         }
     }
+
+    public void mainWorker()
+    {
+
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        try
+        {
+
+            List<string> copiedFiles = new List<string>();
+            System.Diagnostics.ProcessStartInfo psi
+                    = new System.Diagnostics.ProcessStartInfo("find", "-type f -name \"*.tar.gz\"");
+            psi.RedirectStandardOutput = true;
+            psi.UseShellExecute = false;
+            psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
+            System.Diagnostics.Process p = System.Diagnostics.Process.Start(psi);
+            p.WaitForExit();
+            string tool_output = p.StandardOutput.ReadToEnd();
+
+            /*psi = new System.Diagnostics.ProcessStartInfo("cp", "s f");
+            psi.RedirectStandardInput = true;
+            psi.RedirectStandardOutput = true;
+            psi.UseShellExecute = false;
+            psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
+            p = System.Diagnostics.Process.Start(psi);
+            p.WaitForExit(); 
+            string ewwewe = p.StandardOutput.ReadToEnd();*/
+
+
+            psi = new System.Diagnostics.ProcessStartInfo("mkdir", "combined");
+            psi.RedirectStandardOutput = true;
+            psi.UseShellExecute = false;
+            psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
+            p = System.Diagnostics.Process.Start(psi);
+            p.WaitForExit();
+
+
+            List<string> filesInFolder = new List<string>();
+            filesInFolder.AddRange(tool_output.Replace("./", "").Split('\n'));
+            filesInFolder.RemoveAll(x => string.IsNullOrEmpty(x));
+            var fileNewTar = p.StandardOutput.ReadToEnd();
+            var fNN = fileNewTar.Replace("./", "").Replace("\n", "");
+            int i = 0;
+            foreach (var archive in filesInFolder)
+            {
+                var dir = archive.Replace(".tar.gz", "");
+                psi = new System.Diagnostics.ProcessStartInfo("mkdir", dir);
+                psi.RedirectStandardOutput = true;
+                psi.UseShellExecute = false;
+                psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
+                p = System.Diagnostics.Process.Start(psi);
+                p.WaitForExit();
+
+
+                if (epic_check.Active)
+                {
+                    runScript(archive, spectra_textview.Buffer.Text, "spectra.sas",
+                        epic_name.Text?.Trim() + i.ToString(), "epic", copiedFiles);
+                }
+                if (mos1check.Active)
+                {
+                    runScript(archive, spmos1textview.Buffer.Text, "spmos1.sas",
+                        mos1_name.Text?.Trim() + i.ToString(), "_mos1", copiedFiles);
+                }
+                if (mos2check.Active)
+                {
+                    runScript(archive, spmos2textview.Buffer.Text, "spmos2.sas",
+                        mos2_name.Text?.Trim() + i.ToString(), "_mos2", copiedFiles);
+                }
+                combined_script_textview.Buffer.Text += $"\n{i} - {archive} ";
+                i++;
+            }
+            combined_script_textview.Buffer.Text += "\n";
+            // combine script
+            var script =
+             "epicspeccombine pha=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".ds")).ToArray()) + "\" \\"
+            + "\nbkg=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains("bkg.fits")).ToArray()) + "\" \\"
+            + "\nrmf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".rmf")).ToArray()) + "\" \\"
+            + "\narf=\"" + String.Join(" ", copiedFiles.Where(x => x.Contains(".arf")).ToArray()) + "\" \\"
+            + "\nfilepha=\"{name}_src_grp.ds\" filebkg=\"{name}_bkg_grp.bkg\" filersp=\"{name}_resp_grp.rmf\""
+            .Replace("{name}", combined_spectra_name.Text?.Trim());
+
+            combined_script_textview.Buffer.Text +="\n" + script;
+
+            logToConsole("combination script");
+            logToConsole(script);
+
+
+
+            watch.Stop();
+            var elapsedS = (watch.ElapsedMilliseconds) / 1000;
+            ShowDialog("All jobs done\n processing time: " + (elapsedS / 60).ToString() + " minutes");
+            button2.Sensitive = true;
+        }
+        catch (Exception ex)
+        {
+
+            ShowDialog(ex.Message);
+        }
+
+    }
+
     public void ShowDialog(string message)
     {
         Gtk.Application.Invoke(delegate {
