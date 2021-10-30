@@ -6,10 +6,9 @@
   <import>
     <widget-library name="../bin/Release/SasRunner.exe" internal="true" />
   </import>
-  <widget class="Gtk.Window" id="MainWindow" design-size="947 638">
-    <action-group name="Default" />
+  <widget class="Gtk.Window" id="MainWindow" design-size="1007 725">
     <property name="MemberName" />
-    <property name="Title" translatable="yes">SasRunner v0.16</property>
+    <property name="Title" translatable="yes">SasRunner v0.23</property>
     <property name="WindowPosition">CenterOnParent</property>
     <property name="DefaultWidth">800</property>
     <property name="DefaultHeight">600</property>
@@ -50,7 +49,7 @@
                     <property name="Text">#!/bin/bash
 # need to enable SAS first!
 . setsas.sh
-
+{multilinecommentbegin}
 export SAS_ODF={sas_odf_dir}/
 cifbuild
 export SAS_CCF={sas_odf_dir}/ccf.cif
@@ -63,8 +62,8 @@ epproc
 PNEVFILE=( *EPN*ImagingEvts.ds)
 cp -f $PNEVFILE pn_evt.fits
 
-ds9 $PNEVFILE
-
+{runguiapps}ds9 $PNEVFILE
+{multilinecommentend}
 #------------------------------------- Edit here ---------
 TARGET="RXJ1856"                  #---- target ID
 EBAND="(PI in [150:15000])"      #---- Energy band
@@ -76,7 +75,7 @@ THRESHOLD=0.4                    #---- Threshold for GTI filtering
 shopt -s nullglob
 
 #------- Go to reduction dir where ccf.cif and SUMMARY file are located ----------
-#cd {workingdir}
+cd {sas_odf_dir}
 
 #------- Set environment variables SAS_CCF and SAS_ODF (observation-specific) ----
 SAS_CCF=ccf.cif ; export SAS_CCF
@@ -111,11 +110,11 @@ sasversion &gt; "sasvers.read"
 
 #------- Filter periods of high background ---------------------------------------
 evselect table=pn_evt.fits withrateset=yes rateset=pn_bkgrate.fits timecolumn=TIME \
-         maketimecolumn=yes timebinsize=100 makeratecolumn=yes \
-         expression='#XMMEA_EP &amp;&amp; (PI&gt;10000&amp;&amp;PI&lt;12000) &amp;&amp; (PATTERN&lt;=4)'
+         maketimecolumn=yes timebinsize={timebinsize} makeratecolumn=yes \
+         expression='#XMMEA_EP &amp;&amp; (PI&gt;10000&amp;&amp;PI&lt;12000) &amp;&amp; (PATTERN{PATTERN1})'
 
 #------- Plot background light curve ---------------------------------------------
-dsplot table=pn_bkgrate.fits x=TIME y=RATE
+{runguiapps}dsplot table=pn_bkgrate.fits x=TIME y=RATE
 
 #------- Generate GTI ------------------------------------------------------------
 #tabgtigen table=pn_bkgrate.fits gtiset=pn_bkggti.fits expression='RATE&lt;=$THRESHOLD'
@@ -129,21 +128,21 @@ evselect table=pn_evt.fits withfilteredset=yes filteredset=pn_flt_evt.fits \
 
 #------- Examine filtered file ---------------------------------------------------
 evselect table=pn_flt_evt.fits withrateset=yes rateset=pn_bkgrate_flt.fits timecolumn=TIME \
-         timebinsize=100 makeratecolumn=yes maketimecolumn=yes \
-         expression='(PI in [10000:12000]) &amp;&amp; (PATTERN&lt;=4) &amp;&amp; #XMMEA_EP'
-dsplot table=pn_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
+         timebinsize={timebinsize} makeratecolumn=yes maketimecolumn=yes \
+         expression='(PI in [10000:12000]) &amp;&amp; (PATTERN{PATTERN2}) &amp;&amp; #XMMEA_EP'
+{runguiapps}dsplot table=pn_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
 
 #------- Create the source spectrum ----------------------------------------------
 evselect table=pn_flt_evt.fits withspectrumset=yes spectrumset=pn_spec.fits \
-         energycolumn=PI spectralbinsize=5 {withspecranges} \
+         energycolumn=PI spectralbinsize={spectralbinsize} {withspecranges} \
 	 specchannelmin=0 specchannelmax=20479 \
-	 expression="#XMMEA_EP &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=4) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
+	 expression="#XMMEA_EP &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN{PATTERN3}) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
 
 #------- Create the background spectrum ------------------------------------------
 evselect table=pn_flt_evt.fits withspectrumset=yes spectrumset=pn_bkg_spec.fits \
-         energycolumn=PI spectralbinsize=5 {withspecranges} \
+         energycolumn=PI spectralbinsize={spectralbinsize} {withspecranges} \
 	 specchannelmin=0 specchannelmax=20479 \
-	 expression="#XMMEA_EP &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=4) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
+	 expression="#XMMEA_EP &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN{PATTERN4}) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
 
 #------- Compute areas of source/background spectra ------------------------------
 backscale spectrumset=pn_spec.fits badpixlocation=pn_flt_evt.fits
@@ -168,12 +167,14 @@ specgroup spectrumset={nametoreplace}_spec.fits mincounts=25 rmfset={nametorepla
 
 mv SpecGrp.ds {nametoreplace}.ds
 
-marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp
+#marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp
 
 #cd ../../../scripts
 
 
-{combine_cp_command}</property>
+{combine_cp_command}
+
+</property>
                   </widget>
                 </child>
               </widget>
@@ -202,7 +203,7 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
                     <property name="Text">#!/bin/bash
 # need to enable SAS first!
 . setsas.sh
-
+{multilinecommentbegin}
 export SAS_ODF={sas_odf_dir}/
 cifbuild
 export SAS_CCF={sas_odf_dir}/ccf.cif
@@ -214,8 +215,8 @@ emproc
 
 PNEVFILE=( *EMOS1*ImagingEvts.ds)
 cp -f $PNEVFILE mos1_evt.fits
-ds9 $PNEVFILE
-
+{runguiapps}ds9 $PNEVFILE
+{multilinecommentend}
 #------------------------------------- Edit here ---------
 TARGET="RXJ0420"                  #---- target ID
 EBAND="(PI in [150:12000])"      #---- Energy band
@@ -227,7 +228,7 @@ THRESHOLD=0.35                    #---- Threshold for GTI filtering
 shopt -s nullglob
 
 #------- Go to reduction dir where ccf.cif and SUMMARY file are located ----------
-#cd {workingdir}
+cd {sas_odf_dir}
 
 #------- Set environment variables SAS_CCF and SAS_ODF (observation-specific) ----
 SAS_CCF=ccf.cif ; export SAS_CCF
@@ -261,11 +262,11 @@ sasversion &gt; "sasvers.read"
 
 #------- Filter periods of high background ---------------------------------------
 evselect table=mos1_evt.fits withrateset=yes rateset=mos1_bkgrate.fits timecolumn=TIME \
-         maketimecolumn=yes timebinsize=100 makeratecolumn=yes \
-         expression='#XMMEA_EM &amp;&amp; (PI&gt;10000) &amp;&amp; (PATTERN==0)'
+         maketimecolumn=yes timebinsize={timebinsize} makeratecolumn=yes \
+         expression='#XMMEA_EM &amp;&amp; (PI&gt;10000) &amp;&amp; (PATTERN{PATTERN1})'
 
 #------- Plot background light curve ---------------------------------------------
-dsplot table=mos1_bkgrate.fits x=TIME y=RATE
+{runguiapps}dsplot table=mos1_bkgrate.fits x=TIME y=RATE
 
 #------- Generate GTI ------------------------------------------------------------
 #tabgtigen table=pn_bkgrate.fits gtiset=pn_bkggti.fits expression='RATE&lt;=$THRESHOLD'
@@ -279,21 +280,21 @@ evselect table=mos1_evt.fits withfilteredset=yes filteredset=mos1_flt_evt.fits \
 
 #------- Examine filtered file ---------------------------------------------------
 evselect table=mos1_flt_evt.fits withrateset=yes rateset=mos1_bkgrate_flt.fits timecolumn=TIME \
-         timebinsize=100 makeratecolumn=yes maketimecolumn=yes \
-         expression='(PI&gt;10000) &amp;&amp; (PATTERN==0) &amp;&amp; #XMMEA_EM'
-dsplot table=mos1_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
+         timebinsize={timebinsize} makeratecolumn=yes maketimecolumn=yes \
+         expression='(PI&gt;10000) &amp;&amp; (PATTERN{PATTERN2}) &amp;&amp; #XMMEA_EM'
+{runguiapps}dsplot table=mos1_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
 
 #------- Create the source spectrum ----------------------------------------------
 evselect table=mos1_flt_evt.fits withspectrumset=yes spectrumset=mos1_spec.fits \
-         energycolumn=PI spectralbinsize=5 {withspecranges} \
+         energycolumn=PI spectralbinsize={spectralbinsize} {withspecranges} \
 	 specchannelmin=0 specchannelmax=11999 \
-	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
+	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN{PATTERN3}) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
 
 #------- Create the background spectrum ------------------------------------------
 evselect table=mos1_flt_evt.fits withspectrumset=yes spectrumset=mos1_bkg_spec.fits \
-         energycolumn=PI spectralbinsize=5 {withspecranges} \
+         energycolumn=PI spectralbinsize={spectralbinsize} {withspecranges} \
 	 specchannelmin=0 specchannelmax=11999 \
-	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
+	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN{PATTERN4}) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
 
 #------- Compute areas of source/background spectra ------------------------------
 backscale spectrumset=mos1_spec.fits badpixlocation=mos1_flt_evt.fits
@@ -321,10 +322,11 @@ arfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits
 
 mv SpecGrp.ds {nametoreplace}.ds
 
-marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp
+#marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp
 
  #cd ../../../scripts
-{combine_cp_command}</property>
+{combine_cp_command}
+</property>
                   </widget>
                 </child>
               </widget>
@@ -353,7 +355,7 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
                     <property name="Text" translatable="yes">#!/bin/bash
 # need to enable SAS first!
 . setsas.sh
-
+{multilinecommentbegin}
 export SAS_ODF={sas_odf_dir}/
 cifbuild
 export SAS_CCF={sas_odf_dir}/ccf.cif
@@ -365,8 +367,8 @@ emproc
 
 PNEVFILE=( *EMOS2*ImagingEvts.ds)
 cp -f $PNEVFILE mos2_evt.fits
-ds9 $PNEVFILE
-
+{runguiapps}ds9 $PNEVFILE
+{multilinecommentend}
 #------------------------------------- Edit here ---------
 TARGET="RXJ0420"                  #---- target ID
 EBAND="(PI in [150:12000])"      #---- Energy band
@@ -378,7 +380,7 @@ THRESHOLD=0.35                    #---- Threshold for GTI filtering
 shopt -s nullglob
 
 #------- Go to reduction dir where ccf.cif and SUMMARY file are located ----------
-#cd {workingdir}
+cd {sas_odf_dir}
 
 #------- Set environment variables SAS_CCF and SAS_ODF (observation-specific) ----
 SAS_CCF=ccf.cif ; export SAS_CCF
@@ -413,11 +415,11 @@ sasversion &gt; "sasvers.read"
 
 #------- Filter periods of high background ---------------------------------------
 evselect table=mos2_evt.fits withrateset=yes rateset=mos2_bkgrate.fits timecolumn=TIME \
-         maketimecolumn=yes timebinsize=100 makeratecolumn=yes \
-         expression='#XMMEA_EM &amp;&amp; (PI&gt;10000) &amp;&amp; (PATTERN==0)'
+         maketimecolumn=yes timebinsize={timebinsize} makeratecolumn=yes \
+         expression='#XMMEA_EM &amp;&amp; (PI&gt;10000) &amp;&amp; (PATTERN{PATTERN1})'
 
 #------- Plot background light curve ---------------------------------------------
-dsplot table=mos2_bkgrate.fits x=TIME y=RATE
+{runguiapps}dsplot table=mos2_bkgrate.fits x=TIME y=RATE
 
 #------- Generate GTI ------------------------------------------------------------
 #tabgtigen table=pn_bkgrate.fits gtiset=pn_bkggti.fits expression='RATE&lt;=$THRESHOLD'
@@ -431,21 +433,21 @@ evselect table=mos2_evt.fits withfilteredset=yes filteredset=mos2_flt_evt.fits \
 
 #------- Examine filtered file ---------------------------------------------------
 evselect table=mos2_flt_evt.fits withrateset=yes rateset=mos2_bkgrate_flt.fits timecolumn=TIME \
-         timebinsize=100 makeratecolumn=yes maketimecolumn=yes \
-         expression='(PI&gt;10000) &amp;&amp; (PATTERN==0) &amp;&amp; #XMMEA_EM'
-dsplot table=mos2_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
+         timebinsize={timebinsize} makeratecolumn=yes maketimecolumn=yes \
+         expression='(PI&gt;10000) &amp;&amp; (PATTERN{PATTERN2}) &amp;&amp; #XMMEA_EM'
+{runguiapps}dsplot table=mos2_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE
 
 #------- Create the source spectrum ----------------------------------------------
 evselect table=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_spec.fits \
-         energycolumn=PI spectralbinsize=5 {withspecranges} \
+         energycolumn=PI spectralbinsize={spectralbinsize} {withspecranges} \
 	 specchannelmin=0 specchannelmax=11999 \
-	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
+	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN{PATTERN3}) &amp;&amp; $SRCREG &amp;&amp; $EBAND"
 
 #------- Create the background spectrum ------------------------------------------
 evselect table=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_bkg_spec.fits \
-         energycolumn=PI spectralbinsize=5 {withspecranges} \
+         energycolumn=PI spectralbinsize={spectralbinsize} {withspecranges} \
 	 specchannelmin=0 specchannelmax=11999 \
-	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN&lt;=12) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
+	 expression="#XMMEA_EM &amp;&amp; (FLAG==0) &amp;&amp; (PATTERN{PATTERN4}) &amp;&amp; $BKGREG &amp;&amp; $EBAND"
 
 #------- Compute areas of source/background spectra ------------------------------
 backscale spectrumset=mos2_spec.fits badpixlocation=mos2_flt_evt.fits
@@ -474,7 +476,7 @@ arfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits
 
 mv SpecGrp.ds {nametoreplace}.ds
        
-marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp
+#marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp
 
 #cd ../../../scripts
 {combine_cp_command}
@@ -529,91 +531,806 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
           </packing>
         </child>
         <child>
-          <widget class="Gtk.HBox" id="hbox1">
+          <widget class="Gtk.Notebook" id="notebook2">
             <property name="MemberName" />
-            <property name="Spacing">6</property>
+            <property name="CanFocus">True</property>
+            <property name="CurrentPage">0</property>
             <child>
-              <widget class="Gtk.CheckButton" id="epic_check">
+              <widget class="Gtk.VBox" id="vbox5">
                 <property name="MemberName" />
-                <property name="CanFocus">True</property>
-                <property name="Label" translatable="yes">Epic name</property>
-                <property name="Active">True</property>
-                <property name="DrawIndicator">True</property>
-                <property name="HasLabel">True</property>
-                <property name="UseUnderline">True</property>
+                <property name="Spacing">6</property>
+                <child>
+                  <widget class="Gtk.HBox" id="hbox1">
+                    <property name="MemberName" />
+                    <property name="Spacing">6</property>
+                    <child>
+                      <widget class="Gtk.CheckButton" id="epic_check">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Label" translatable="yes">Epic</property>
+                        <property name="Active">True</property>
+                        <property name="DrawIndicator">True</property>
+                        <property name="HasLabel">True</property>
+                        <property name="UseUnderline">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="epic_name">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">pn</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">1</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.CheckButton" id="mos1check">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Label" translatable="yes">Mos1 </property>
+                        <property name="Active">True</property>
+                        <property name="DrawIndicator">True</property>
+                        <property name="HasLabel">True</property>
+                        <property name="UseUnderline">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="mos1_name">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">mos1_</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">3</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.CheckButton" id="mos2check">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Label" translatable="yes">Mos2 </property>
+                        <property name="Active">True</property>
+                        <property name="DrawIndicator">True</property>
+                        <property name="HasLabel">True</property>
+                        <property name="UseUnderline">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">4</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="mos2_name">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">mos2_</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">5</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="Position">0</property>
+                    <property name="AutoSize">True</property>
+                    <property name="Expand">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.HBox" id="hbox5">
+                    <property name="MemberName" />
+                    <property name="Spacing">6</property>
+                    <child>
+                      <widget class="Gtk.Label" id="label13">
+                        <property name="MemberName" />
+                        <property name="Xpad">23</property>
+                        <property name="LabelProp" translatable="yes">Pattern</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.VBox" id="vbox2">
+                        <property name="MemberName" />
+                        <property name="Spacing">6</property>
+                        <child>
+                          <widget class="Gtk.Entry" id="epic_pattern1">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=4</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">0</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="Gtk.Entry" id="epic_pattern2">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=4</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">1</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="Gtk.Entry" id="epic_pattern3">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=4</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">2</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="Gtk.Entry" id="epic_pattern4">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=4</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">3</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="Position">1</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="label12">
+                        <property name="MemberName" />
+                        <property name="Xpad">23</property>
+                        <property name="LabelProp" translatable="yes">Pattern</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.VBox" id="vbox3">
+                        <property name="MemberName" />
+                        <property name="Spacing">6</property>
+                        <child>
+                          <widget class="Gtk.Entry" id="mos1_pattern1">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=12</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">0</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="Gtk.Entry" id="mos1_pattern2">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=12</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">1</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="Gtk.Entry" id="mos1_pattern3">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=12</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">2</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="Gtk.Entry" id="mos1_pattern4">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=12</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">3</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="Position">3</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="label10">
+                        <property name="MemberName" />
+                        <property name="Xpad">23</property>
+                        <property name="LabelProp" translatable="yes">Pattern</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">4</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.VBox" id="vbox4">
+                        <property name="MemberName" />
+                        <property name="Spacing">6</property>
+                        <child>
+                          <widget class="Gtk.Entry" id="mos2_pattern1">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=12</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">0</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="Gtk.Entry" id="mos2_pattern2">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=12</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">1</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="Gtk.Entry" id="mos2_pattern3">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=12</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">2</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="Gtk.Entry" id="mos2_pattern4">
+                            <property name="MemberName" />
+                            <property name="CanFocus">True</property>
+                            <property name="Text" translatable="yes">&lt;=12</property>
+                            <property name="IsEditable">True</property>
+                            <property name="InvisibleChar">•</property>
+                          </widget>
+                          <packing>
+                            <property name="Position">3</property>
+                            <property name="AutoSize">True</property>
+                            <property name="Expand">False</property>
+                            <property name="Fill">False</property>
+                          </packing>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="Position">5</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="Position">1</property>
+                    <property name="AutoSize">True</property>
+                    <property name="Expand">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.HBox" id="hbox4">
+                    <property name="MemberName" />
+                    <property name="Spacing">6</property>
+                    <child>
+                      <widget class="Gtk.Label" id="label14">
+                        <property name="MemberName" />
+                        <property name="Xpad">10</property>
+                        <property name="LabelProp" translatable="yes">timebinsize</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="epic_timeBinSize">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">100</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">1</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="label15">
+                        <property name="MemberName" />
+                        <property name="Xpad">10</property>
+                        <property name="LabelProp" translatable="yes">timebinsize</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="mos1_timeBinSize">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">100</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">3</property>
+                        <property name="AutoSize">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="label11">
+                        <property name="MemberName" />
+                        <property name="Xpad">10</property>
+                        <property name="LabelProp" translatable="yes">timebinsize</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">4</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="mos2_timeBinSize">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">100</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">5</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="Position">2</property>
+                    <property name="AutoSize">True</property>
+                    <property name="Expand">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.HBox" id="hbox6">
+                    <property name="MemberName" />
+                    <property name="Spacing">6</property>
+                    <child>
+                      <widget class="Gtk.Label" id="label16">
+                        <property name="MemberName" />
+                        <property name="LabelProp" translatable="yes">spectralbinsize</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="epic_spectralbinsize">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">5</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">1</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="label17">
+                        <property name="MemberName" />
+                        <property name="LabelProp" translatable="yes">spectralbinsize</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="mos1_spectralbinsize">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">5</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">3</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="label18">
+                        <property name="MemberName" />
+                        <property name="LabelProp" translatable="yes">spectralbinsize</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">4</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="mos2_spectralbinsize1">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">5</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">5</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="Position">3</property>
+                    <property name="AutoSize">True</property>
+                    <property name="Expand">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.HBox" id="hbox2">
+                    <property name="MemberName" />
+                    <property name="Spacing">6</property>
+                    <child>
+                      <widget class="Gtk.CheckButton" id="combine_spectracheck">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Label" translatable="yes">Combine Spectra</property>
+                        <property name="DrawIndicator">True</property>
+                        <property name="HasLabel">True</property>
+                        <property name="UseUnderline">True</property>
+                        <signal name="Clicked" handler="spectraCheck" />
+                      </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="combined_spectra_name">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">pn</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">1</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.CheckButton" id="deleteExtFiles">
+                        <property name="MemberName" />
+                        <property name="Tooltip" translatable="yes">Deleting of extracted files is undesired in some scenario, for example - when we need to generate rgs spectra. It needs archive files to exist.</property>
+                        <property name="CanFocus">True</property>
+                        <property name="Label" translatable="yes">Delete extracted files afterwards</property>
+                        <property name="DrawIndicator">True</property>
+                        <property name="HasLabel">True</property>
+                        <property name="UseUnderline">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="Position">4</property>
+                    <property name="AutoSize">True</property>
+                    <property name="Expand">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.HBox" id="hbox3">
+                    <property name="MemberName" />
+                    <property name="Visible">False</property>
+                    <property name="Spacing">6</property>
+                    <child>
+                      <widget class="Gtk.Label" id="label3">
+                        <property name="MemberName" />
+                        <property name="LabelProp" translatable="yes">rmfgen  EnergyMin</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="rmfgenEnergyMin">
+                        <property name="MemberName" />
+                        <property name="Tooltip" translatable="yes">This parameter is needed for combine scenario case, when rmfgen is run by different params than usual case
+
+rmfgen spectrumset=src_spectrum_01.ds rmfset=response_01.rmf \
+   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 </property>
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">0.1</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">1</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="label9">
+                        <property name="MemberName" />
+                        <property name="LabelProp" translatable="yes">rmfgen EnergyMax</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="rmfgenEnergyMax">
+                        <property name="MemberName" />
+                        <property name="Tooltip" translatable="yes">This parameter is needed for combine scenario case, when rmfgen is run by different params than usual case
+
+rmfgen spectrumset=src_spectrum_01.ds rmfset=response_01.rmf \
+   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 </property>
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">12.0</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">3</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="label8">
+                        <property name="MemberName" />
+                        <property name="LabelProp" translatable="yes">rmfgen nenergybins</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">4</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Entry" id="rmfgennenergybins">
+                        <property name="MemberName" />
+                        <property name="Tooltip" translatable="yes">This parameter is needed for combine scenario case, when rmfgen is run by different params than usual case
+
+rmfgen spectrumset=src_spectrum_01.ds rmfset=response_01.rmf \
+   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 </property>
+                        <property name="CanFocus">True</property>
+                        <property name="Text" translatable="yes">2400</property>
+                        <property name="IsEditable">True</property>
+                        <property name="InvisibleChar">•</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">5</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="Position">5</property>
+                    <property name="AutoSize">True</property>
+                    <property name="Expand">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
+                </child>
+              </widget>
+            </child>
+            <child>
+              <widget class="Gtk.Label" id="page1">
+                <property name="MemberName" />
+                <property name="LabelProp" translatable="yes">generation properties</property>
               </widget>
               <packing>
-                <property name="Position">0</property>
-                <property name="AutoSize">True</property>
+                <property name="type">tab</property>
               </packing>
             </child>
             <child>
-              <widget class="Gtk.Entry" id="epic_name">
+              <widget class="Gtk.VBox" id="vbox6">
                 <property name="MemberName" />
-                <property name="CanFocus">True</property>
-                <property name="Text" translatable="yes">pn</property>
-                <property name="IsEditable">True</property>
-                <property name="InvisibleChar">•</property>
+                <property name="Spacing">6</property>
+                <child>
+                  <widget class="Gtk.HBox" id="hbox7">
+                    <property name="MemberName" />
+                    <property name="Spacing">6</property>
+                    <child>
+                      <widget class="Gtk.CheckButton" id="runguiapps">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Label" translatable="yes">Run ds9 &amp; dsplot</property>
+                        <property name="Active">True</property>
+                        <property name="DrawIndicator">True</property>
+                        <property name="HasLabel">True</property>
+                        <property name="UseUnderline">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.CheckButton" id="threadedRun">
+                        <property name="MemberName" />
+                        <property name="Tooltip" translatable="yes">Threaded run increases chance of program crash, but program is responsive when working.
+If crash occures, try run program without threading enabled.</property>
+                        <property name="CanFocus">True</property>
+                        <property name="Label" translatable="yes">Run threaded</property>
+                        <property name="Active">True</property>
+                        <property name="DrawIndicator">True</property>
+                        <property name="HasLabel">True</property>
+                        <property name="UseUnderline">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">1</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.CheckButton" id="usepredefinedselections">
+                        <property name="MemberName" />
+                        <property name="Tooltip" translatable="yes">For this, you should put selection files in /selections/{observation id} folder</property>
+                        <property name="CanFocus">True</property>
+                        <property name="Label" translatable="yes">Use predefined selections</property>
+                        <property name="Active">True</property>
+                        <property name="DrawIndicator">True</property>
+                        <property name="HasLabel">True</property>
+                        <property name="UseUnderline">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.CheckButton" id="runxspec">
+                        <property name="MemberName" />
+                        <property name="Tooltip" translatable="yes">Run xspec and see generated specta after generation</property>
+                        <property name="CanFocus">True</property>
+                        <property name="Label" translatable="yes">Run XSPEC afterwards</property>
+                        <property name="Active">True</property>
+                        <property name="DrawIndicator">True</property>
+                        <property name="HasLabel">True</property>
+                        <property name="UseUnderline">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">3</property>
+                        <property name="AutoSize">True</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="Position">0</property>
+                    <property name="AutoSize">True</property>
+                    <property name="Expand">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
+                </child>
               </widget>
               <packing>
                 <property name="Position">1</property>
-                <property name="AutoSize">True</property>
               </packing>
             </child>
             <child>
-              <widget class="Gtk.CheckButton" id="mos1check">
+              <widget class="Gtk.Label" id="label7">
                 <property name="MemberName" />
-                <property name="CanFocus">True</property>
-                <property name="Label" translatable="yes">Mos1 Name</property>
-                <property name="Active">True</property>
-                <property name="DrawIndicator">True</property>
-                <property name="HasLabel">True</property>
-                <property name="UseUnderline">True</property>
+                <property name="LabelProp" translatable="yes">tool settings</property>
               </widget>
               <packing>
-                <property name="Position">2</property>
-                <property name="AutoSize">True</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.Entry" id="mos1_name">
-                <property name="MemberName" />
-                <property name="CanFocus">True</property>
-                <property name="Text" translatable="yes">mos1_</property>
-                <property name="IsEditable">True</property>
-                <property name="InvisibleChar">•</property>
-              </widget>
-              <packing>
-                <property name="Position">3</property>
-                <property name="AutoSize">True</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.CheckButton" id="mos2check">
-                <property name="MemberName" />
-                <property name="CanFocus">True</property>
-                <property name="Label" translatable="yes">Mos2 name</property>
-                <property name="Active">True</property>
-                <property name="DrawIndicator">True</property>
-                <property name="HasLabel">True</property>
-                <property name="UseUnderline">True</property>
-              </widget>
-              <packing>
-                <property name="Position">4</property>
-                <property name="AutoSize">True</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.Entry" id="mos2_name">
-                <property name="MemberName" />
-                <property name="CanFocus">True</property>
-                <property name="Text" translatable="yes">mos2_</property>
-                <property name="IsEditable">True</property>
-                <property name="InvisibleChar">•</property>
-              </widget>
-              <packing>
-                <property name="Position">5</property>
-                <property name="AutoSize">True</property>
+                <property name="type">tab</property>
               </packing>
             </child>
           </widget>
@@ -625,188 +1342,44 @@ marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace}.arf outfil={nametoreplac
           </packing>
         </child>
         <child>
-          <widget class="Gtk.HBox" id="hbox2">
+          <widget class="Gtk.HBox" id="hbox8">
             <property name="MemberName" />
             <property name="Spacing">6</property>
             <child>
-              <widget class="Gtk.CheckButton" id="combine_spectracheck">
+              <widget class="Gtk.Button" id="button2">
                 <property name="MemberName" />
                 <property name="CanFocus">True</property>
-                <property name="Label" translatable="yes">Combine Spectra</property>
-                <property name="Active">True</property>
-                <property name="DrawIndicator">True</property>
-                <property name="HasLabel">True</property>
+                <property name="Type">TextOnly</property>
+                <property name="Label" translatable="yes">Generate</property>
                 <property name="UseUnderline">True</property>
+                <signal name="Clicked" handler="OnButton2Clicked" />
               </widget>
               <packing>
                 <property name="Position">0</property>
                 <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
               </packing>
             </child>
             <child>
-              <widget class="Gtk.Entry" id="combined_spectra_name">
+              <widget class="Gtk.Button" id="button1">
                 <property name="MemberName" />
                 <property name="CanFocus">True</property>
-                <property name="Text" translatable="yes">pn</property>
-                <property name="IsEditable">True</property>
-                <property name="InvisibleChar">•</property>
+                <property name="Type">TextOnly</property>
+                <property name="Label" translatable="yes">Re-generate</property>
+                <property name="UseUnderline">True</property>
+                <signal name="Clicked" handler="OnRegenerateClicked" />
               </widget>
               <packing>
                 <property name="Position">1</property>
                 <property name="AutoSize">True</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.CheckButton" id="deleteExtFiles">
-                <property name="MemberName" />
-                <property name="Tooltip" translatable="yes">Deleting of extracted files is undesired in some scenario, for example - when we need to generate rgs spectra. It needs archive files to exist.</property>
-                <property name="CanFocus">True</property>
-                <property name="Label" translatable="yes">Delete extracted files afterwards</property>
-                <property name="Active">True</property>
-                <property name="DrawIndicator">True</property>
-                <property name="HasLabel">True</property>
-                <property name="UseUnderline">True</property>
-              </widget>
-              <packing>
-                <property name="Position">2</property>
-                <property name="AutoSize">True</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.CheckButton" id="threadedRun">
-                <property name="MemberName" />
-                <property name="Tooltip" translatable="yes">Threaded run increases chance of program crash, but program is responsive when working.
-If crash occures, try run program without threading enabled.</property>
-                <property name="CanFocus">True</property>
-                <property name="Label" translatable="yes">Run threaded</property>
-                <property name="DrawIndicator">True</property>
-                <property name="HasLabel">True</property>
-                <property name="UseUnderline">True</property>
-              </widget>
-              <packing>
-                <property name="Position">3</property>
-                <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
               </packing>
             </child>
           </widget>
           <packing>
             <property name="Position">2</property>
-            <property name="AutoSize">True</property>
-            <property name="Expand">False</property>
-            <property name="Fill">False</property>
-          </packing>
-        </child>
-        <child>
-          <widget class="Gtk.HBox" id="hbox3">
-            <property name="MemberName" />
-            <property name="Spacing">6</property>
-            <child>
-              <widget class="Gtk.Label" id="label3">
-                <property name="MemberName" />
-                <property name="LabelProp" translatable="yes">rmfgen  EnergyMin</property>
-              </widget>
-              <packing>
-                <property name="Position">0</property>
-                <property name="AutoSize">True</property>
-                <property name="Expand">False</property>
-                <property name="Fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.Entry" id="rmfgenEnergyMin">
-                <property name="MemberName" />
-                <property name="Tooltip" translatable="yes">This parameter is needed for combine scenario case, when rmfgen is run by different params than usual case
-
-rmfgen spectrumset=src_spectrum_01.ds rmfset=response_01.rmf \
-   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 </property>
-                <property name="CanFocus">True</property>
-                <property name="Text" translatable="yes">0.1</property>
-                <property name="IsEditable">True</property>
-                <property name="InvisibleChar">•</property>
-              </widget>
-              <packing>
-                <property name="Position">1</property>
-                <property name="AutoSize">True</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.Label" id="label9">
-                <property name="MemberName" />
-                <property name="LabelProp" translatable="yes">rmfgen EnergyMax</property>
-              </widget>
-              <packing>
-                <property name="Position">2</property>
-                <property name="AutoSize">True</property>
-                <property name="Expand">False</property>
-                <property name="Fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.Entry" id="rmfgenEnergyMax">
-                <property name="MemberName" />
-                <property name="Tooltip" translatable="yes">This parameter is needed for combine scenario case, when rmfgen is run by different params than usual case
-
-rmfgen spectrumset=src_spectrum_01.ds rmfset=response_01.rmf \
-   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 </property>
-                <property name="CanFocus">True</property>
-                <property name="Text" translatable="yes">12.0</property>
-                <property name="IsEditable">True</property>
-                <property name="InvisibleChar">•</property>
-              </widget>
-              <packing>
-                <property name="Position">3</property>
-                <property name="AutoSize">True</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.Label" id="label8">
-                <property name="MemberName" />
-                <property name="LabelProp" translatable="yes">rmfgen nenergybins</property>
-              </widget>
-              <packing>
-                <property name="Position">4</property>
-                <property name="AutoSize">True</property>
-                <property name="Expand">False</property>
-                <property name="Fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.Entry" id="rmfgennenergybins">
-                <property name="MemberName" />
-                <property name="Tooltip" translatable="yes">This parameter is needed for combine scenario case, when rmfgen is run by different params than usual case
-
-rmfgen spectrumset=src_spectrum_01.ds rmfset=response_01.rmf \
-   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 </property>
-                <property name="CanFocus">True</property>
-                <property name="Text" translatable="yes">2400</property>
-                <property name="IsEditable">True</property>
-                <property name="InvisibleChar">•</property>
-              </widget>
-              <packing>
-                <property name="Position">5</property>
-                <property name="AutoSize">True</property>
-              </packing>
-            </child>
-          </widget>
-          <packing>
-            <property name="Position">3</property>
-            <property name="AutoSize">True</property>
-            <property name="Expand">False</property>
-            <property name="Fill">False</property>
-          </packing>
-        </child>
-        <child>
-          <widget class="Gtk.Button" id="button2">
-            <property name="MemberName" />
-            <property name="CanFocus">True</property>
-            <property name="Type">TextOnly</property>
-            <property name="Label" translatable="yes">Generate</property>
-            <property name="UseUnderline">True</property>
-            <signal name="Clicked" handler="OnButton2Clicked" />
-          </widget>
-          <packing>
-            <property name="PackType">End</property>
-            <property name="Position">4</property>
             <property name="AutoSize">True</property>
             <property name="Expand">False</property>
             <property name="Fill">False</property>

@@ -3,8 +3,6 @@
 
 public partial class MainWindow
 {
-	private global::Gtk.UIManager UIManager;
-
 	private global::Gtk.VBox vbox1;
 
 	private global::Gtk.Notebook notebook1;
@@ -37,6 +35,10 @@ public partial class MainWindow
 
 	private global::Gtk.Label label2;
 
+	private global::Gtk.Notebook notebook2;
+
+	private global::Gtk.VBox vbox5;
+
 	private global::Gtk.HBox hbox1;
 
 	private global::Gtk.CheckButton epic_check;
@@ -51,6 +53,72 @@ public partial class MainWindow
 
 	private global::Gtk.Entry mos2_name;
 
+	private global::Gtk.HBox hbox5;
+
+	private global::Gtk.Label label13;
+
+	private global::Gtk.VBox vbox2;
+
+	private global::Gtk.Entry epic_pattern1;
+
+	private global::Gtk.Entry epic_pattern2;
+
+	private global::Gtk.Entry epic_pattern3;
+
+	private global::Gtk.Entry epic_pattern4;
+
+	private global::Gtk.Label label12;
+
+	private global::Gtk.VBox vbox3;
+
+	private global::Gtk.Entry mos1_pattern1;
+
+	private global::Gtk.Entry mos1_pattern2;
+
+	private global::Gtk.Entry mos1_pattern3;
+
+	private global::Gtk.Entry mos1_pattern4;
+
+	private global::Gtk.Label label10;
+
+	private global::Gtk.VBox vbox4;
+
+	private global::Gtk.Entry mos2_pattern1;
+
+	private global::Gtk.Entry mos2_pattern2;
+
+	private global::Gtk.Entry mos2_pattern3;
+
+	private global::Gtk.Entry mos2_pattern4;
+
+	private global::Gtk.HBox hbox4;
+
+	private global::Gtk.Label label14;
+
+	private global::Gtk.Entry epic_timeBinSize;
+
+	private global::Gtk.Label label15;
+
+	private global::Gtk.Entry mos1_timeBinSize;
+
+	private global::Gtk.Label label11;
+
+	private global::Gtk.Entry mos2_timeBinSize;
+
+	private global::Gtk.HBox hbox6;
+
+	private global::Gtk.Label label16;
+
+	private global::Gtk.Entry epic_spectralbinsize;
+
+	private global::Gtk.Label label17;
+
+	private global::Gtk.Entry mos1_spectralbinsize;
+
+	private global::Gtk.Label label18;
+
+	private global::Gtk.Entry mos2_spectralbinsize1;
+
 	private global::Gtk.HBox hbox2;
 
 	private global::Gtk.CheckButton combine_spectracheck;
@@ -58,8 +126,6 @@ public partial class MainWindow
 	private global::Gtk.Entry combined_spectra_name;
 
 	private global::Gtk.CheckButton deleteExtFiles;
-
-	private global::Gtk.CheckButton threadedRun;
 
 	private global::Gtk.HBox hbox3;
 
@@ -75,18 +141,34 @@ public partial class MainWindow
 
 	private global::Gtk.Entry rmfgennenergybins;
 
+	private global::Gtk.Label page1;
+
+	private global::Gtk.VBox vbox6;
+
+	private global::Gtk.HBox hbox7;
+
+	private global::Gtk.CheckButton runguiapps;
+
+	private global::Gtk.CheckButton threadedRun;
+
+	private global::Gtk.CheckButton usepredefinedselections;
+
+	private global::Gtk.CheckButton runxspec;
+
+	private global::Gtk.Label label7;
+
+	private global::Gtk.HBox hbox8;
+
 	private global::Gtk.Button button2;
+
+	private global::Gtk.Button button1;
 
 	protected virtual void Build()
 	{
 		global::Stetic.Gui.Initialize(this);
 		// Widget MainWindow
-		this.UIManager = new global::Gtk.UIManager();
-		global::Gtk.ActionGroup w1 = new global::Gtk.ActionGroup("Default");
-		this.UIManager.InsertActionGroup(w1, 0);
-		this.AddAccelGroup(this.UIManager.AccelGroup);
 		this.Name = "MainWindow";
-		this.Title = global::Mono.Unix.Catalog.GetString("SasRunner v0.16");
+		this.Title = global::Mono.Unix.Catalog.GetString("SasRunner v0.23");
 		this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 		this.DefaultWidth = 800;
 		this.DefaultHeight = 600;
@@ -115,56 +197,58 @@ public partial class MainWindow
 		this.GtkScrolledWindow4.ShadowType = ((global::Gtk.ShadowType)(1));
 		// Container child GtkScrolledWindow4.Gtk.Container+ContainerChild
 		this.spectra_textview = new global::Gtk.TextView();
-		this.spectra_textview.Buffer.Text = "#!/bin/bash\n# need to enable SAS first!\n. setsas.sh\n\nexport SAS_ODF={sas_odf_dir}" +
-			"/\ncifbuild\nexport SAS_CCF={sas_odf_dir}/ccf.cif\nodfingest\nSUMFILE=( *SUM.SAS)\nSA" +
-			"S_ODF=$SUMFILE\nexport SAS_ODF\nepproc\n\nPNEVFILE=( *EPN*ImagingEvts.ds)\ncp -f $PNE" +
-			"VFILE pn_evt.fits\n\nds9 $PNEVFILE\n\n#------------------------------------- Edit he" +
-			"re ---------\nTARGET=\"RXJ1856\"                  #---- target ID\nEBAND=\"(PI in [15" +
-			"0:15000])\"      #---- Energy band\nSRCREGFILE=\"src.reg\"           #---- Source re" +
-			"g file\nBKGREGFILE=\"bkg.reg\"           #---- Background reg file\nTHRESHOLD=0.4   " +
-			"                 #---- Threshold for GTI filtering\n#----------------------------" +
-			"-----------------------------\n\nshopt -s nullglob\n\n#------- Go to reduction dir w" +
-			"here ccf.cif and SUMMARY file are located ----------\n#cd {workingdir}\n\n#------- " +
-			"Set environment variables SAS_CCF and SAS_ODF (observation-specific) ----\nSAS_CC" +
-			"F=ccf.cif ; export SAS_CCF\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE ; export SAS_ODF" +
-			"\n\n#------- Get ObsID and satellite revolution from the SUMMARY file ------------" +
-			"----\nOBSID=`grep \'/ Observation Identifier\' < $SUMFILE | awk \'{print $1}\'`\nREV=`" +
-			"grep \'/ Revolution Identifier\' < $SUMFILE | awk \'{print $1}\'`\n\n#------- Get sour" +
-			"ce and background coordinates from reg files --------------------\nawk \'BEGIN{FS " +
-			"= \"(\"};/circle/{print $2}\' $SRCREGFILE > toto\nSRCREGCOORD=`awk \'BEGIN{FS = \")\"};" +
-			"{print $1}\' toto`\nawk \'BEGIN{FS = \"(\"};/circle/{print $2}\' $BKGREGFILE > toto\nBK" +
-			"GREGCOORD=`awk \'BEGIN{FS = \")\"};{print $1}\' toto`\nrm -f toto\nSRCREG=\"((X,Y) in c" +
-			"ircle($SRCREGCOORD))\"\nBKGREG=\"((X,Y) in circle($BKGREGCOORD))\"\n\n#------- Find pn" +
-			" event list to work with and copy it to spec dir -----------------\n\n#cp -f $PNEV" +
-			"FILE ../spectra\n\n#------- Change to spec directory -----------------------------" +
-			"-------------------\n#cd ../spectra\n\n#------- Copy event file -------------------" +
-			"--------------------------------------\n\n\n#------- Keep a record of the SAS versi" +
-			"on of the analysis in the directory -------\nsasversion > \"sasvers.read\"\n\n#------" +
-			"- Filter periods of high background ---------------------------------------\nevse" +
-			"lect table=pn_evt.fits withrateset=yes rateset=pn_bkgrate.fits timecolumn=TIME \\" +
-			"\n         maketimecolumn=yes timebinsize=100 makeratecolumn=yes \\\n         expre" +
-			"ssion=\'#XMMEA_EP && (PI>10000&&PI<12000) && (PATTERN<=4)\'\n\n#------- Plot backgro" +
-			"und light curve ---------------------------------------------\ndsplot table=pn_bk" +
-			"grate.fits x=TIME y=RATE\n\n#------- Generate GTI --------------------------------" +
-			"----------------------------\n#tabgtigen table=pn_bkgrate.fits gtiset=pn_bkggti.f" +
-			"its expression=\'RATE<=$THRESHOLD\'\n\ntabgtigen table=pn_bkgrate.fits expression=\'R" +
-			"ATE<=0.4\' gtiset=pn_bkggti.fits \n\n#------- Filter event file with GTI ----------" +
-			"------------------------------------\nevselect table=pn_evt.fits withfilteredset=" +
-			"yes filteredset=pn_flt_evt.fits \\\n         destruct=yes keepfilteroutput=yes \\\n\t" +
-			" expression=\'#XMMEA_EP && gti(pn_bkggti.fits,TIME) && (PI>150)\'\n\n#------- Examin" +
-			"e filtered file ---------------------------------------------------\nevselect tab" +
-			"le=pn_flt_evt.fits withrateset=yes rateset=pn_bkgrate_flt.fits timecolumn=TIME \\" +
-			"\n         timebinsize=100 makeratecolumn=yes maketimecolumn=yes \\\n         expre" +
-			"ssion=\'(PI in [10000:12000]) && (PATTERN<=4) && #XMMEA_EP\'\ndsplot table=pn_bkgra" +
-			"te_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE\n\n#------- Create the source s" +
-			"pectrum ----------------------------------------------\nevselect table=pn_flt_evt" +
-			".fits withspectrumset=yes spectrumset=pn_spec.fits \\\n         energycolumn=PI sp" +
-			"ectralbinsize=5 {withspecranges} \\\n\t specchannelmin=0 specchannelmax=20479 \\\n\t e" +
-			"xpression=\"#XMMEA_EP && (FLAG==0) && (PATTERN<=4) && $SRCREG && $EBAND\"\n\n#------" +
-			"- Create the background spectrum ------------------------------------------\nevse" +
-			"lect table=pn_flt_evt.fits withspectrumset=yes spectrumset=pn_bkg_spec.fits \\\n  " +
-			"       energycolumn=PI spectralbinsize=5 {withspecranges} \\\n\t specchannelmin=0 s" +
-			"pecchannelmax=20479 \\\n\t expression=\"#XMMEA_EP && (FLAG==0) && (PATTERN<=4) && $B" +
+		this.spectra_textview.Buffer.Text = "#!/bin/bash\n# need to enable SAS first!\n. setsas.sh\n{multilinecommentbegin}\nexpor" +
+			"t SAS_ODF={sas_odf_dir}/\ncifbuild\nexport SAS_CCF={sas_odf_dir}/ccf.cif\nodfingest" +
+			"\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE\nexport SAS_ODF\nepproc\n\nPNEVFILE=( *EPN*Ima" +
+			"gingEvts.ds)\ncp -f $PNEVFILE pn_evt.fits\n\n{runguiapps}ds9 $PNEVFILE\n{multilineco" +
+			"mmentend}\n#------------------------------------- Edit here ---------\nTARGET=\"RXJ" +
+			"1856\"                  #---- target ID\nEBAND=\"(PI in [150:15000])\"      #---- En" +
+			"ergy band\nSRCREGFILE=\"src.reg\"           #---- Source reg file\nBKGREGFILE=\"bkg.r" +
+			"eg\"           #---- Background reg file\nTHRESHOLD=0.4                    #---- T" +
+			"hreshold for GTI filtering\n#----------------------------------------------------" +
+			"-----\n\nshopt -s nullglob\n\n#------- Go to reduction dir where ccf.cif and SUMMARY" +
+			" file are located ----------\ncd {sas_odf_dir}\n\n#------- Set environment variable" +
+			"s SAS_CCF and SAS_ODF (observation-specific) ----\nSAS_CCF=ccf.cif ; export SAS_C" +
+			"CF\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE ; export SAS_ODF\n\n#------- Get ObsID and" +
+			" satellite revolution from the SUMMARY file ----------------\nOBSID=`grep \'/ Obse" +
+			"rvation Identifier\' < $SUMFILE | awk \'{print $1}\'`\nREV=`grep \'/ Revolution Ident" +
+			"ifier\' < $SUMFILE | awk \'{print $1}\'`\n\n#------- Get source and background coordi" +
+			"nates from reg files --------------------\nawk \'BEGIN{FS = \"(\"};/circle/{print $2" +
+			"}\' $SRCREGFILE > toto\nSRCREGCOORD=`awk \'BEGIN{FS = \")\"};{print $1}\' toto`\nawk \'B" +
+			"EGIN{FS = \"(\"};/circle/{print $2}\' $BKGREGFILE > toto\nBKGREGCOORD=`awk \'BEGIN{FS" +
+			" = \")\"};{print $1}\' toto`\nrm -f toto\nSRCREG=\"((X,Y) in circle($SRCREGCOORD))\"\nBK" +
+			"GREG=\"((X,Y) in circle($BKGREGCOORD))\"\n\n#------- Find pn event list to work with" +
+			" and copy it to spec dir -----------------\n\n#cp -f $PNEVFILE ../spectra\n\n#------" +
+			"- Change to spec directory ------------------------------------------------\n#cd " +
+			"../spectra\n\n#------- Copy event file -------------------------------------------" +
+			"--------------\n\n\n#------- Keep a record of the SAS version of the analysis in th" +
+			"e directory -------\nsasversion > \"sasvers.read\"\n\n#------- Filter periods of high" +
+			" background ---------------------------------------\nevselect table=pn_evt.fits w" +
+			"ithrateset=yes rateset=pn_bkgrate.fits timecolumn=TIME \\\n         maketimecolumn" +
+			"=yes timebinsize={timebinsize} makeratecolumn=yes \\\n         expression=\'#XMMEA_" +
+			"EP && (PI>10000&&PI<12000) && (PATTERN{PATTERN1})\'\n\n#------- Plot background lig" +
+			"ht curve ---------------------------------------------\n{runguiapps}dsplot table=" +
+			"pn_bkgrate.fits x=TIME y=RATE\n\n#------- Generate GTI ---------------------------" +
+			"---------------------------------\n#tabgtigen table=pn_bkgrate.fits gtiset=pn_bkg" +
+			"gti.fits expression=\'RATE<=$THRESHOLD\'\n\ntabgtigen table=pn_bkgrate.fits expressi" +
+			"on=\'RATE<=0.4\' gtiset=pn_bkggti.fits \n\n#------- Filter event file with GTI -----" +
+			"-----------------------------------------\nevselect table=pn_evt.fits withfiltere" +
+			"dset=yes filteredset=pn_flt_evt.fits \\\n         destruct=yes keepfilteroutput=ye" +
+			"s \\\n\t expression=\'#XMMEA_EP && gti(pn_bkggti.fits,TIME) && (PI>150)\'\n\n#------- E" +
+			"xamine filtered file ---------------------------------------------------\nevselec" +
+			"t table=pn_flt_evt.fits withrateset=yes rateset=pn_bkgrate_flt.fits timecolumn=T" +
+			"IME \\\n         timebinsize={timebinsize} makeratecolumn=yes maketimecolumn=yes \\" +
+			"\n         expression=\'(PI in [10000:12000]) && (PATTERN{PATTERN2}) && #XMMEA_EP\'" +
+			"\n{runguiapps}dsplot table=pn_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=" +
+			"RATE\n\n#------- Create the source spectrum --------------------------------------" +
+			"--------\nevselect table=pn_flt_evt.fits withspectrumset=yes spectrumset=pn_spec." +
+			"fits \\\n         energycolumn=PI spectralbinsize={spectralbinsize} {withspecrange" +
+			"s} \\\n\t specchannelmin=0 specchannelmax=20479 \\\n\t expression=\"#XMMEA_EP && (FLAG=" +
+			"=0) && (PATTERN{PATTERN3}) && $SRCREG && $EBAND\"\n\n#------- Create the background" +
+			" spectrum ------------------------------------------\nevselect table=pn_flt_evt.f" +
+			"its withspectrumset=yes spectrumset=pn_bkg_spec.fits \\\n         energycolumn=PI " +
+			"spectralbinsize={spectralbinsize} {withspecranges} \\\n\t specchannelmin=0 specchan" +
+			"nelmax=20479 \\\n\t expression=\"#XMMEA_EP && (FLAG==0) && (PATTERN{PATTERN4}) && $B" +
 			"KGREG && $EBAND\"\n\n#------- Compute areas of source/background spectra ----------" +
 			"--------------------\nbackscale spectrumset=pn_spec.fits badpixlocation=pn_flt_ev" +
 			"t.fits\nbackscale spectrumset=pn_bkg_spec.fits badpixlocation=pn_flt_evt.fits\n\n#-" +
@@ -179,15 +263,15 @@ public partial class MainWindow
 			"metoreplace}_bkg.fits \n\n#mv SpecGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\n#specgrou" +
 			"p spectrumset=RXJ0420_0141751201_pn_spec.fits mincounts=20 #rmfset=RXJ0420_01417" +
 			"51201_pn.rmf \\\n#arfset=RXJ0420_0141751201_pn.arf #backgndset=RXJ0420_0141751201_" +
-			"pn_bkg_spec.fits \n\nmv SpecGrp.ds {nametoreplace}.ds\n\nmarfrmf rmfil={nametoreplac" +
-			"e}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp\n\n#cd ../../../script" +
-			"s\n\n\n{combine_cp_command}";
+			"pn_bkg_spec.fits \n\nmv SpecGrp.ds {nametoreplace}.ds\n\n#marfrmf rmfil={nametorepla" +
+			"ce}.rmf arfil={nametoreplace}.arf outfil={nametoreplace}.rsp\n\n#cd ../../../scrip" +
+			"ts\n\n\n{combine_cp_command}\n\n";
 		this.spectra_textview.CanFocus = true;
 		this.spectra_textview.Name = "spectra_textview";
 		this.GtkScrolledWindow4.Add(this.spectra_textview);
 		this.notebook1.Add(this.GtkScrolledWindow4);
-		global::Gtk.Notebook.NotebookChild w4 = ((global::Gtk.Notebook.NotebookChild)(this.notebook1[this.GtkScrolledWindow4]));
-		w4.Position = 1;
+		global::Gtk.Notebook.NotebookChild w3 = ((global::Gtk.Notebook.NotebookChild)(this.notebook1[this.GtkScrolledWindow4]));
+		w3.Position = 1;
 		// Notebook tab
 		this.label4 = new global::Gtk.Label();
 		this.label4.Name = "label4";
@@ -200,79 +284,81 @@ public partial class MainWindow
 		this.GtkScrolledWindow5.ShadowType = ((global::Gtk.ShadowType)(1));
 		// Container child GtkScrolledWindow5.Gtk.Container+ContainerChild
 		this.spmos1textview = new global::Gtk.TextView();
-		this.spmos1textview.Buffer.Text = "#!/bin/bash\n# need to enable SAS first!\n. setsas.sh\n\nexport SAS_ODF={sas_odf_dir}" +
-			"/\ncifbuild\nexport SAS_CCF={sas_odf_dir}/ccf.cif\nodfingest\nSUMFILE=( *SUM.SAS)\nSA" +
-			"S_ODF=$SUMFILE\nexport SAS_ODF\nemproc\n\nPNEVFILE=( *EMOS1*ImagingEvts.ds)\ncp -f $P" +
-			"NEVFILE mos1_evt.fits\nds9 $PNEVFILE\n\n#------------------------------------- Edit" +
-			" here ---------\nTARGET=\"RXJ0420\"                  #---- target ID\nEBAND=\"(PI in " +
-			"[150:12000])\"      #---- Energy band\nSRCREGFILE=\"mos1src.reg\"           #---- So" +
-			"urce reg file\nBKGREGFILE=\"mos1bkg.reg\"           #---- Background reg file\nTHRES" +
-			"HOLD=0.35                    #---- Threshold for GTI filtering\n#----------------" +
-			"-----------------------------------------\n\nshopt -s nullglob\n\n#------- Go to red" +
-			"uction dir where ccf.cif and SUMMARY file are located ----------\n#cd {workingdir" +
-			"}\n\n#------- Set environment variables SAS_CCF and SAS_ODF (observation-specific)" +
-			" ----\nSAS_CCF=ccf.cif ; export SAS_CCF\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE ; ex" +
-			"port SAS_ODF\n\n#------- Get ObsID and satellite revolution from the SUMMARY file " +
-			"----------------\nOBSID=`grep \'/ Observation Identifier\' < $SUMFILE | awk \'{print" +
-			" $1}\'`\nREV=`grep \'/ Revolution Identifier\' < $SUMFILE | awk \'{print $1}\'`\n\n#----" +
-			"--- Get source and background coordinates from reg files --------------------\naw" +
-			"k \'BEGIN{FS = \"(\"};/circle/{print $2}\' $SRCREGFILE > toto\nSRCREGCOORD=`awk \'BEGI" +
-			"N{FS = \")\"};{print $1}\' toto`\nawk \'BEGIN{FS = \"(\"};/circle/{print $2}\' $BKGREGFI" +
-			"LE > toto\nBKGREGCOORD=`awk \'BEGIN{FS = \")\"};{print $1}\' toto`\nrm -f toto\nSRCREG=" +
-			"\"((X,Y) in circle($SRCREGCOORD))\"\nBKGREG=\"((X,Y) in circle($BKGREGCOORD))\"\n\n#---" +
-			"---- Find pn event list to work with and copy it to spec dir -----------------\n#" +
-			"cp -f $PNEVFILE ../spectra\n\n#------- Change to spec directory ------------------" +
-			"------------------------------\n#cd ../spectra\n\n#------- Copy event file --------" +
-			"-------------------------------------------------\n\n\n#------- Keep a record of th" +
-			"e SAS version of the analysis in the directory -------\nsasversion > \"sasvers.rea" +
-			"d\"\n\n#------- Filter periods of high background ---------------------------------" +
-			"------\nevselect table=mos1_evt.fits withrateset=yes rateset=mos1_bkgrate.fits ti" +
-			"mecolumn=TIME \\\n         maketimecolumn=yes timebinsize=100 makeratecolumn=yes \\" +
-			"\n         expression=\'#XMMEA_EM && (PI>10000) && (PATTERN==0)\'\n\n#------- Plot ba" +
-			"ckground light curve ---------------------------------------------\ndsplot table=" +
-			"mos1_bkgrate.fits x=TIME y=RATE\n\n#------- Generate GTI -------------------------" +
-			"-----------------------------------\n#tabgtigen table=pn_bkgrate.fits gtiset=pn_b" +
-			"kggti.fits expression=\'RATE<=$THRESHOLD\'\n\ntabgtigen table=mos1_bkgrate.fits expr" +
-			"ession=\'RATE<=0.35\' gtiset=mos1_bkggti.fits \n\n#------- Filter event file with GT" +
-			"I ----------------------------------------------\nevselect table=mos1_evt.fits wi" +
-			"thfilteredset=yes filteredset=mos1_flt_evt.fits \\\n         destruct=yes keepfilt" +
-			"eroutput=yes \\\n\t expression=\'#XMMEA_EM && gti(mos1_bkggti.fits,TIME) && (PI>150)" +
-			"\'\n\n#------- Examine filtered file ----------------------------------------------" +
-			"-----\nevselect table=mos1_flt_evt.fits withrateset=yes rateset=mos1_bkgrate_flt." +
-			"fits timecolumn=TIME \\\n         timebinsize=100 makeratecolumn=yes maketimecolum" +
-			"n=yes \\\n         expression=\'(PI>10000) && (PATTERN==0) && #XMMEA_EM\'\ndsplot tab" +
-			"le=mos1_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE\n\n#------- Create" +
-			" the source spectrum ----------------------------------------------\nevselect tab" +
-			"le=mos1_flt_evt.fits withspectrumset=yes spectrumset=mos1_spec.fits \\\n         e" +
-			"nergycolumn=PI spectralbinsize=5 {withspecranges} \\\n\t specchannelmin=0 specchann" +
-			"elmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0) && (PATTERN<=12) && $SRCREG &" +
-			"& $EBAND\"\n\n#------- Create the background spectrum -----------------------------" +
-			"-------------\nevselect table=mos1_flt_evt.fits withspectrumset=yes spectrumset=m" +
-			"os1_bkg_spec.fits \\\n         energycolumn=PI spectralbinsize=5 {withspecranges} " +
-			"\\\n\t specchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0)" +
-			" && (PATTERN<=12) && $BKGREG && $EBAND\"\n\n#------- Compute areas of source/backgr" +
-			"ound spectra ------------------------------\nbackscale spectrumset=mos1_spec.fits" +
-			" badpixlocation=mos1_flt_evt.fits\nbackscale spectrumset=mos1_bkg_spec.fits badpi" +
-			"xlocation=mos1_flt_evt.fits\n\n#------- Create response matrix and ancillary file " +
-			"-------------------------------\nrmfgen spectrumset=mos1_spec.fits rmfset=mos1.rm" +
-			"f {rmfgenRemainningCombineScript}\narfgen spectrumset=mos1_spec.fits arfset=mos1." +
-			"arf withrmfset=yes rmfset=mos1.rmf {arfgenNotCombineScript}\n#psfenergy=1.0 \\\n # " +
-			"     extendedsource=no modelee=yes\n       \n#------- Copy files -----------------" +
-			"---------------------------------------------\ncp -f mos1_spec.fits {nametoreplac" +
-			"e}_spec.fits\ncp -f mos1_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f mos1.rmf {n" +
-			"ametoreplace}.rmf\ncp -f mos1.arf {nametoreplace}.arf\n\n#specgroup spectrumset=pn_" +
-			"spec.fits mincounts=25 oversample=3 rmfset=pn.rmf \\\n#arfset=pn.arf backgndset=pn" +
-			"_bkg_spec.fits \n\n#mv SpecGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\nspecgroup spectr" +
-			"umset={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace}" +
-			".rmf  \\\narfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\nmv Spec" +
-			"Grp.ds {nametoreplace}.ds\n\nmarfrmf rmfil={nametoreplace}.rmf arfil={nametoreplac" +
-			"e}.arf outfil={nametoreplace}.rsp\n\n #cd ../../../scripts\n{combine_cp_command}";
+		this.spmos1textview.Buffer.Text = "#!/bin/bash\n# need to enable SAS first!\n. setsas.sh\n{multilinecommentbegin}\nexpor" +
+			"t SAS_ODF={sas_odf_dir}/\ncifbuild\nexport SAS_CCF={sas_odf_dir}/ccf.cif\nodfingest" +
+			"\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE\nexport SAS_ODF\nemproc\n\nPNEVFILE=( *EMOS1*I" +
+			"magingEvts.ds)\ncp -f $PNEVFILE mos1_evt.fits\n{runguiapps}ds9 $PNEVFILE\n{multilin" +
+			"ecommentend}\n#------------------------------------- Edit here ---------\nTARGET=\"" +
+			"RXJ0420\"                  #---- target ID\nEBAND=\"(PI in [150:12000])\"      #----" +
+			" Energy band\nSRCREGFILE=\"mos1src.reg\"           #---- Source reg file\nBKGREGFILE" +
+			"=\"mos1bkg.reg\"           #---- Background reg file\nTHRESHOLD=0.35               " +
+			"     #---- Threshold for GTI filtering\n#----------------------------------------" +
+			"-----------------\n\nshopt -s nullglob\n\n#------- Go to reduction dir where ccf.cif" +
+			" and SUMMARY file are located ----------\ncd {sas_odf_dir}\n\n#------- Set environm" +
+			"ent variables SAS_CCF and SAS_ODF (observation-specific) ----\nSAS_CCF=ccf.cif ; " +
+			"export SAS_CCF\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE ; export SAS_ODF\n\n#------- G" +
+			"et ObsID and satellite revolution from the SUMMARY file ----------------\nOBSID=`" +
+			"grep \'/ Observation Identifier\' < $SUMFILE | awk \'{print $1}\'`\nREV=`grep \'/ Revo" +
+			"lution Identifier\' < $SUMFILE | awk \'{print $1}\'`\n\n#------- Get source and backg" +
+			"round coordinates from reg files --------------------\nawk \'BEGIN{FS = \"(\"};/circ" +
+			"le/{print $2}\' $SRCREGFILE > toto\nSRCREGCOORD=`awk \'BEGIN{FS = \")\"};{print $1}\' " +
+			"toto`\nawk \'BEGIN{FS = \"(\"};/circle/{print $2}\' $BKGREGFILE > toto\nBKGREGCOORD=`a" +
+			"wk \'BEGIN{FS = \")\"};{print $1}\' toto`\nrm -f toto\nSRCREG=\"((X,Y) in circle($SRCRE" +
+			"GCOORD))\"\nBKGREG=\"((X,Y) in circle($BKGREGCOORD))\"\n\n#------- Find pn event list " +
+			"to work with and copy it to spec dir -----------------\n#cp -f $PNEVFILE ../spect" +
+			"ra\n\n#------- Change to spec directory ------------------------------------------" +
+			"------\n#cd ../spectra\n\n#------- Copy event file --------------------------------" +
+			"-------------------------\n\n\n#------- Keep a record of the SAS version of the ana" +
+			"lysis in the directory -------\nsasversion > \"sasvers.read\"\n\n#------- Filter peri" +
+			"ods of high background ---------------------------------------\nevselect table=mo" +
+			"s1_evt.fits withrateset=yes rateset=mos1_bkgrate.fits timecolumn=TIME \\\n        " +
+			" maketimecolumn=yes timebinsize={timebinsize} makeratecolumn=yes \\\n         expr" +
+			"ession=\'#XMMEA_EM && (PI>10000) && (PATTERN{PATTERN1})\'\n\n#------- Plot backgroun" +
+			"d light curve ---------------------------------------------\n{runguiapps}dsplot t" +
+			"able=mos1_bkgrate.fits x=TIME y=RATE\n\n#------- Generate GTI --------------------" +
+			"----------------------------------------\n#tabgtigen table=pn_bkgrate.fits gtiset" +
+			"=pn_bkggti.fits expression=\'RATE<=$THRESHOLD\'\n\ntabgtigen table=mos1_bkgrate.fits" +
+			" expression=\'RATE<=0.35\' gtiset=mos1_bkggti.fits \n\n#------- Filter event file wi" +
+			"th GTI ----------------------------------------------\nevselect table=mos1_evt.fi" +
+			"ts withfilteredset=yes filteredset=mos1_flt_evt.fits \\\n         destruct=yes kee" +
+			"pfilteroutput=yes \\\n\t expression=\'#XMMEA_EM && gti(mos1_bkggti.fits,TIME) && (PI" +
+			">150)\'\n\n#------- Examine filtered file -----------------------------------------" +
+			"----------\nevselect table=mos1_flt_evt.fits withrateset=yes rateset=mos1_bkgrate" +
+			"_flt.fits timecolumn=TIME \\\n         timebinsize={timebinsize} makeratecolumn=ye" +
+			"s maketimecolumn=yes \\\n         expression=\'(PI>10000) && (PATTERN{PATTERN2}) &&" +
+			" #XMMEA_EM\'\n{runguiapps}dsplot table=mos1_bkgrate_flt.fits:RATE withx=yes x=TIME" +
+			" withy=yes y=RATE\n\n#------- Create the source spectrum -------------------------" +
+			"---------------------\nevselect table=mos1_flt_evt.fits withspectrumset=yes spect" +
+			"rumset=mos1_spec.fits \\\n         energycolumn=PI spectralbinsize={spectralbinsiz" +
+			"e} {withspecranges} \\\n\t specchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#X" +
+			"MMEA_EM && (FLAG==0) && (PATTERN{PATTERN3}) && $SRCREG && $EBAND\"\n\n#------- Crea" +
+			"te the background spectrum ------------------------------------------\nevselect t" +
+			"able=mos1_flt_evt.fits withspectrumset=yes spectrumset=mos1_bkg_spec.fits \\\n    " +
+			"     energycolumn=PI spectralbinsize={spectralbinsize} {withspecranges} \\\n\t spec" +
+			"channelmin=0 specchannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0) && (PAT" +
+			"TERN{PATTERN4}) && $BKGREG && $EBAND\"\n\n#------- Compute areas of source/backgrou" +
+			"nd spectra ------------------------------\nbackscale spectrumset=mos1_spec.fits b" +
+			"adpixlocation=mos1_flt_evt.fits\nbackscale spectrumset=mos1_bkg_spec.fits badpixl" +
+			"ocation=mos1_flt_evt.fits\n\n#------- Create response matrix and ancillary file --" +
+			"-----------------------------\nrmfgen spectrumset=mos1_spec.fits rmfset=mos1.rmf " +
+			"{rmfgenRemainningCombineScript}\narfgen spectrumset=mos1_spec.fits arfset=mos1.ar" +
+			"f withrmfset=yes rmfset=mos1.rmf {arfgenNotCombineScript}\n#psfenergy=1.0 \\\n #   " +
+			"   extendedsource=no modelee=yes\n       \n#------- Copy files -------------------" +
+			"-------------------------------------------\ncp -f mos1_spec.fits {nametoreplace}" +
+			"_spec.fits\ncp -f mos1_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f mos1.rmf {nam" +
+			"etoreplace}.rmf\ncp -f mos1.arf {nametoreplace}.arf\n\n#specgroup spectrumset=pn_sp" +
+			"ec.fits mincounts=25 oversample=3 rmfset=pn.rmf \\\n#arfset=pn.arf backgndset=pn_b" +
+			"kg_spec.fits \n\n#mv SpecGrp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\nspecgroup spectrum" +
+			"set={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace}.r" +
+			"mf  \\\narfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\nmv SpecGr" +
+			"p.ds {nametoreplace}.ds\n\n#marfrmf rmfil={nametoreplace}.rmf arfil={nametoreplace" +
+			"}.arf outfil={nametoreplace}.rsp\n\n #cd ../../../scripts\n{combine_cp_command}\n";
 		this.spmos1textview.CanFocus = true;
 		this.spmos1textview.Name = "spmos1textview";
 		this.GtkScrolledWindow5.Add(this.spmos1textview);
 		this.notebook1.Add(this.GtkScrolledWindow5);
-		global::Gtk.Notebook.NotebookChild w6 = ((global::Gtk.Notebook.NotebookChild)(this.notebook1[this.GtkScrolledWindow5]));
-		w6.Position = 2;
+		global::Gtk.Notebook.NotebookChild w5 = ((global::Gtk.Notebook.NotebookChild)(this.notebook1[this.GtkScrolledWindow5]));
+		w5.Position = 2;
 		// Notebook tab
 		this.label5 = new global::Gtk.Label();
 		this.label5.Name = "label5";
@@ -285,81 +371,83 @@ public partial class MainWindow
 		this.GtkScrolledWindow2.ShadowType = ((global::Gtk.ShadowType)(1));
 		// Container child GtkScrolledWindow2.Gtk.Container+ContainerChild
 		this.spmos2textview = new global::Gtk.TextView();
-		this.spmos2textview.Buffer.Text = global::Mono.Unix.Catalog.GetString("#!/bin/bash\n# need to enable SAS first!\n. setsas.sh\n\nexport SAS_ODF={sas_odf_dir}" +
-				"/\ncifbuild\nexport SAS_CCF={sas_odf_dir}/ccf.cif\nodfingest\nSUMFILE=( *SUM.SAS)\nSA" +
-				"S_ODF=$SUMFILE\nexport SAS_ODF\nemproc\n\nPNEVFILE=( *EMOS2*ImagingEvts.ds)\ncp -f $P" +
-				"NEVFILE mos2_evt.fits\nds9 $PNEVFILE\n\n#------------------------------------- Edit" +
-				" here ---------\nTARGET=\"RXJ0420\"                  #---- target ID\nEBAND=\"(PI in " +
-				"[150:12000])\"      #---- Energy band\nSRCREGFILE=\"mos2src.reg\"           #---- So" +
-				"urce reg file\nBKGREGFILE=\"mos2bkg.reg\"           #---- Background reg file\nTHRES" +
-				"HOLD=0.35                    #---- Threshold for GTI filtering\n#----------------" +
-				"-----------------------------------------\n\nshopt -s nullglob\n\n#------- Go to red" +
-				"uction dir where ccf.cif and SUMMARY file are located ----------\n#cd {workingdir" +
-				"}\n\n#------- Set environment variables SAS_CCF and SAS_ODF (observation-specific)" +
-				" ----\nSAS_CCF=ccf.cif ; export SAS_CCF\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE ; ex" +
-				"port SAS_ODF\n\n#------- Get ObsID and satellite revolution from the SUMMARY file " +
-				"----------------\nOBSID=`grep \'/ Observation Identifier\' < $SUMFILE | awk \'{print" +
-				" $1}\'`\nREV=`grep \'/ Revolution Identifier\' < $SUMFILE | awk \'{print $1}\'`\n\n#----" +
-				"--- Get source and background coordinates from reg files --------------------\naw" +
-				"k \'BEGIN{FS = \"(\"};/circle/{print $2}\' $SRCREGFILE > toto\nSRCREGCOORD=`awk \'BEGI" +
-				"N{FS = \")\"};{print $1}\' toto`\nawk \'BEGIN{FS = \"(\"};/circle/{print $2}\' $BKGREGFI" +
-				"LE > toto\nBKGREGCOORD=`awk \'BEGIN{FS = \")\"};{print $1}\' toto`\nrm -f toto\nSRCREG=" +
-				"\"((X,Y) in circle($SRCREGCOORD))\"\nBKGREG=\"((X,Y) in circle($BKGREGCOORD))\"\n\n#---" +
-				"---- Find pn event list to work with and copy it to spec dir -----------------\n\n" +
-				"#cp -f $PNEVFILE ../spectra\n\n#------- Change to spec directory -----------------" +
-				"-------------------------------\n#cd ../spectra\n\n#------- Copy event file -------" +
-				"--------------------------------------------------\n\n\n#------- Keep a record of t" +
-				"he SAS version of the analysis in the directory -------\nsasversion > \"sasvers.re" +
-				"ad\"\n\n#------- Filter periods of high background --------------------------------" +
-				"-------\nevselect table=mos2_evt.fits withrateset=yes rateset=mos2_bkgrate.fits t" +
-				"imecolumn=TIME \\\n         maketimecolumn=yes timebinsize=100 makeratecolumn=yes " +
-				"\\\n         expression=\'#XMMEA_EM && (PI>10000) && (PATTERN==0)\'\n\n#------- Plot b" +
-				"ackground light curve ---------------------------------------------\ndsplot table" +
-				"=mos2_bkgrate.fits x=TIME y=RATE\n\n#------- Generate GTI ------------------------" +
-				"------------------------------------\n#tabgtigen table=pn_bkgrate.fits gtiset=pn_" +
-				"bkggti.fits expression=\'RATE<=$THRESHOLD\'\n\ntabgtigen table=mos2_bkgrate.fits exp" +
-				"ression=\'RATE<=0.35\' gtiset=mos2_bkggti.fits \n\n#------- Filter event file with G" +
-				"TI ----------------------------------------------\nevselect table=mos2_evt.fits w" +
-				"ithfilteredset=yes filteredset=mos2_flt_evt.fits \\\n         destruct=yes keepfil" +
-				"teroutput=yes \\\n\t expression=\'#XMMEA_EM && gti(mos2_bkggti.fits,TIME) && (PI>150" +
-				")\'\n\n#------- Examine filtered file ---------------------------------------------" +
-				"------\nevselect table=mos2_flt_evt.fits withrateset=yes rateset=mos2_bkgrate_flt" +
-				".fits timecolumn=TIME \\\n         timebinsize=100 makeratecolumn=yes maketimecolu" +
-				"mn=yes \\\n         expression=\'(PI>10000) && (PATTERN==0) && #XMMEA_EM\'\ndsplot ta" +
-				"ble=mos2_bkgrate_flt.fits:RATE withx=yes x=TIME withy=yes y=RATE\n\n#------- Creat" +
-				"e the source spectrum ----------------------------------------------\nevselect ta" +
-				"ble=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_spec.fits \\\n         " +
-				"energycolumn=PI spectralbinsize=5 {withspecranges} \\\n\t specchannelmin=0 specchan" +
-				"nelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0) && (PATTERN<=12) && $SRCREG " +
-				"&& $EBAND\"\n\n#------- Create the background spectrum ----------------------------" +
-				"--------------\nevselect table=mos2_flt_evt.fits withspectrumset=yes spectrumset=" +
-				"mos2_bkg_spec.fits \\\n         energycolumn=PI spectralbinsize=5 {withspecranges}" +
-				" \\\n\t specchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0" +
-				") && (PATTERN<=12) && $BKGREG && $EBAND\"\n\n#------- Compute areas of source/backg" +
-				"round spectra ------------------------------\nbackscale spectrumset=mos2_spec.fit" +
-				"s badpixlocation=mos2_flt_evt.fits\nbackscale spectrumset=mos2_bkg_spec.fits badp" +
-				"ixlocation=mos2_flt_evt.fits\n\n#------- Create response matrix and ancillary file" +
-				" -------------------------------\nrmfgen spectrumset=mos2_spec.fits rmfset=mos2.r" +
-				"mf {rmfgenRemainningCombineScript}\narfgen spectrumset=mos2_spec.fits arfset=mos2" +
-				".arf withrmfset=yes rmfset=mos2.rmf {arfgenNotCombineScript} \n       \n#psfenergy" +
-				"=1.0 \\\n #      extendedsource=no modelee=yes\n       \n#------- Copy files -------" +
-				"-------------------------------------------------------\ncp -f mos2_spec.fits {na" +
-				"metoreplace}_spec.fits\ncp -f mos2_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f m" +
-				"os2.rmf {nametoreplace}.rmf\ncp -f mos2.arf {nametoreplace}.arf\n\nspecgroup spectr" +
-				"umset={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace}" +
-				".rmf \\\narfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\n#mv Spec" +
-				"Grp.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\n#specgroup spectrumset=RXJ0420_0651470201" +
-				"_mos2_spec.fits mincounts=20 rmfset=RXJ0420_0651470201_mos2.rmf \\\n#arfset=RXJ042" +
-				"0_0651470201_mos2.arf backgndset=RXJ0420_0651470201_mos2_bkg_spec.fits \n\nmv Spec" +
-				"Grp.ds {nametoreplace}.ds\n       \nmarfrmf rmfil={nametoreplace}.rmf arfil={namet" +
-				"oreplace}.arf outfil={nametoreplace}.rsp\n\n#cd ../../../scripts\n{combine_cp_comma" +
-				"nd}\n");
+		this.spmos2textview.Buffer.Text = global::Mono.Unix.Catalog.GetString("#!/bin/bash\n# need to enable SAS first!\n. setsas.sh\n{multilinecommentbegin}\nexpor" +
+				"t SAS_ODF={sas_odf_dir}/\ncifbuild\nexport SAS_CCF={sas_odf_dir}/ccf.cif\nodfingest" +
+				"\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE\nexport SAS_ODF\nemproc\n\nPNEVFILE=( *EMOS2*I" +
+				"magingEvts.ds)\ncp -f $PNEVFILE mos2_evt.fits\n{runguiapps}ds9 $PNEVFILE\n{multilin" +
+				"ecommentend}\n#------------------------------------- Edit here ---------\nTARGET=\"" +
+				"RXJ0420\"                  #---- target ID\nEBAND=\"(PI in [150:12000])\"      #----" +
+				" Energy band\nSRCREGFILE=\"mos2src.reg\"           #---- Source reg file\nBKGREGFILE" +
+				"=\"mos2bkg.reg\"           #---- Background reg file\nTHRESHOLD=0.35               " +
+				"     #---- Threshold for GTI filtering\n#----------------------------------------" +
+				"-----------------\n\nshopt -s nullglob\n\n#------- Go to reduction dir where ccf.cif" +
+				" and SUMMARY file are located ----------\ncd {sas_odf_dir}\n\n#------- Set environm" +
+				"ent variables SAS_CCF and SAS_ODF (observation-specific) ----\nSAS_CCF=ccf.cif ; " +
+				"export SAS_CCF\nSUMFILE=( *SUM.SAS)\nSAS_ODF=$SUMFILE ; export SAS_ODF\n\n#------- G" +
+				"et ObsID and satellite revolution from the SUMMARY file ----------------\nOBSID=`" +
+				"grep \'/ Observation Identifier\' < $SUMFILE | awk \'{print $1}\'`\nREV=`grep \'/ Revo" +
+				"lution Identifier\' < $SUMFILE | awk \'{print $1}\'`\n\n#------- Get source and backg" +
+				"round coordinates from reg files --------------------\nawk \'BEGIN{FS = \"(\"};/circ" +
+				"le/{print $2}\' $SRCREGFILE > toto\nSRCREGCOORD=`awk \'BEGIN{FS = \")\"};{print $1}\' " +
+				"toto`\nawk \'BEGIN{FS = \"(\"};/circle/{print $2}\' $BKGREGFILE > toto\nBKGREGCOORD=`a" +
+				"wk \'BEGIN{FS = \")\"};{print $1}\' toto`\nrm -f toto\nSRCREG=\"((X,Y) in circle($SRCRE" +
+				"GCOORD))\"\nBKGREG=\"((X,Y) in circle($BKGREGCOORD))\"\n\n#------- Find pn event list " +
+				"to work with and copy it to spec dir -----------------\n\n#cp -f $PNEVFILE ../spec" +
+				"tra\n\n#------- Change to spec directory -----------------------------------------" +
+				"-------\n#cd ../spectra\n\n#------- Copy event file -------------------------------" +
+				"--------------------------\n\n\n#------- Keep a record of the SAS version of the an" +
+				"alysis in the directory -------\nsasversion > \"sasvers.read\"\n\n#------- Filter per" +
+				"iods of high background ---------------------------------------\nevselect table=m" +
+				"os2_evt.fits withrateset=yes rateset=mos2_bkgrate.fits timecolumn=TIME \\\n       " +
+				"  maketimecolumn=yes timebinsize={timebinsize} makeratecolumn=yes \\\n         exp" +
+				"ression=\'#XMMEA_EM && (PI>10000) && (PATTERN{PATTERN1})\'\n\n#------- Plot backgrou" +
+				"nd light curve ---------------------------------------------\n{runguiapps}dsplot " +
+				"table=mos2_bkgrate.fits x=TIME y=RATE\n\n#------- Generate GTI -------------------" +
+				"-----------------------------------------\n#tabgtigen table=pn_bkgrate.fits gtise" +
+				"t=pn_bkggti.fits expression=\'RATE<=$THRESHOLD\'\n\ntabgtigen table=mos2_bkgrate.fit" +
+				"s expression=\'RATE<=0.35\' gtiset=mos2_bkggti.fits \n\n#------- Filter event file w" +
+				"ith GTI ----------------------------------------------\nevselect table=mos2_evt.f" +
+				"its withfilteredset=yes filteredset=mos2_flt_evt.fits \\\n         destruct=yes ke" +
+				"epfilteroutput=yes \\\n\t expression=\'#XMMEA_EM && gti(mos2_bkggti.fits,TIME) && (P" +
+				"I>150)\'\n\n#------- Examine filtered file ----------------------------------------" +
+				"-----------\nevselect table=mos2_flt_evt.fits withrateset=yes rateset=mos2_bkgrat" +
+				"e_flt.fits timecolumn=TIME \\\n         timebinsize={timebinsize} makeratecolumn=y" +
+				"es maketimecolumn=yes \\\n         expression=\'(PI>10000) && (PATTERN{PATTERN2}) &" +
+				"& #XMMEA_EM\'\n{runguiapps}dsplot table=mos2_bkgrate_flt.fits:RATE withx=yes x=TIM" +
+				"E withy=yes y=RATE\n\n#------- Create the source spectrum ------------------------" +
+				"----------------------\nevselect table=mos2_flt_evt.fits withspectrumset=yes spec" +
+				"trumset=mos2_spec.fits \\\n         energycolumn=PI spectralbinsize={spectralbinsi" +
+				"ze} {withspecranges} \\\n\t specchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#" +
+				"XMMEA_EM && (FLAG==0) && (PATTERN{PATTERN3}) && $SRCREG && $EBAND\"\n\n#------- Cre" +
+				"ate the background spectrum ------------------------------------------\nevselect " +
+				"table=mos2_flt_evt.fits withspectrumset=yes spectrumset=mos2_bkg_spec.fits \\\n   " +
+				"      energycolumn=PI spectralbinsize={spectralbinsize} {withspecranges} \\\n\t spe" +
+				"cchannelmin=0 specchannelmax=11999 \\\n\t expression=\"#XMMEA_EM && (FLAG==0) && (PA" +
+				"TTERN{PATTERN4}) && $BKGREG && $EBAND\"\n\n#------- Compute areas of source/backgro" +
+				"und spectra ------------------------------\nbackscale spectrumset=mos2_spec.fits " +
+				"badpixlocation=mos2_flt_evt.fits\nbackscale spectrumset=mos2_bkg_spec.fits badpix" +
+				"location=mos2_flt_evt.fits\n\n#------- Create response matrix and ancillary file -" +
+				"------------------------------\nrmfgen spectrumset=mos2_spec.fits rmfset=mos2.rmf" +
+				" {rmfgenRemainningCombineScript}\narfgen spectrumset=mos2_spec.fits arfset=mos2.a" +
+				"rf withrmfset=yes rmfset=mos2.rmf {arfgenNotCombineScript} \n       \n#psfenergy=1" +
+				".0 \\\n #      extendedsource=no modelee=yes\n       \n#------- Copy files ---------" +
+				"-----------------------------------------------------\ncp -f mos2_spec.fits {name" +
+				"toreplace}_spec.fits\ncp -f mos2_bkg_spec.fits {nametoreplace}_bkg.fits\ncp -f mos" +
+				"2.rmf {nametoreplace}.rmf\ncp -f mos2.arf {nametoreplace}.arf\n\nspecgroup spectrum" +
+				"set={nametoreplace}_spec.fits mincounts=25 oversample=3 rmfset={nametoreplace}.r" +
+				"mf \\\narfset={nametoreplace}.arf backgndset={nametoreplace}_bkg.fits \n\n#mv SpecGr" +
+				"p.ds ${TARGET}_${OBSID}_pn_gr3.fits\n\n#specgroup spectrumset=RXJ0420_0651470201_m" +
+				"os2_spec.fits mincounts=20 rmfset=RXJ0420_0651470201_mos2.rmf \\\n#arfset=RXJ0420_" +
+				"0651470201_mos2.arf backgndset=RXJ0420_0651470201_mos2_bkg_spec.fits \n\nmv SpecGr" +
+				"p.ds {nametoreplace}.ds\n       \n#marfrmf rmfil={nametoreplace}.rmf arfil={nameto" +
+				"replace}.arf outfil={nametoreplace}.rsp\n\n#cd ../../../scripts\n{combine_cp_comman" +
+				"d}\n");
 		this.spmos2textview.CanFocus = true;
 		this.spmos2textview.Name = "spmos2textview";
 		this.GtkScrolledWindow2.Add(this.spmos2textview);
 		this.notebook1.Add(this.GtkScrolledWindow2);
-		global::Gtk.Notebook.NotebookChild w8 = ((global::Gtk.Notebook.NotebookChild)(this.notebook1[this.GtkScrolledWindow2]));
-		w8.Position = 3;
+		global::Gtk.Notebook.NotebookChild w7 = ((global::Gtk.Notebook.NotebookChild)(this.notebook1[this.GtkScrolledWindow2]));
+		w7.Position = 3;
 		// Notebook tab
 		this.label6 = new global::Gtk.Label();
 		this.label6.Name = "label6";
@@ -376,8 +464,8 @@ public partial class MainWindow
 		this.combined_script_textview.Name = "combined_script_textview";
 		this.GtkScrolledWindow3.Add(this.combined_script_textview);
 		this.notebook1.Add(this.GtkScrolledWindow3);
-		global::Gtk.Notebook.NotebookChild w10 = ((global::Gtk.Notebook.NotebookChild)(this.notebook1[this.GtkScrolledWindow3]));
-		w10.Position = 4;
+		global::Gtk.Notebook.NotebookChild w9 = ((global::Gtk.Notebook.NotebookChild)(this.notebook1[this.GtkScrolledWindow3]));
+		w9.Position = 4;
 		// Notebook tab
 		this.label2 = new global::Gtk.Label();
 		this.label2.Name = "label2";
@@ -385,9 +473,18 @@ public partial class MainWindow
 		this.notebook1.SetTabLabel(this.GtkScrolledWindow3, this.label2);
 		this.label2.ShowAll();
 		this.vbox1.Add(this.notebook1);
-		global::Gtk.Box.BoxChild w11 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.notebook1]));
-		w11.Position = 0;
+		global::Gtk.Box.BoxChild w10 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.notebook1]));
+		w10.Position = 0;
 		// Container child vbox1.Gtk.Box+BoxChild
+		this.notebook2 = new global::Gtk.Notebook();
+		this.notebook2.CanFocus = true;
+		this.notebook2.Name = "notebook2";
+		this.notebook2.CurrentPage = 0;
+		// Container child notebook2.Gtk.Notebook+NotebookChild
+		this.vbox5 = new global::Gtk.VBox();
+		this.vbox5.Name = "vbox5";
+		this.vbox5.Spacing = 6;
+		// Container child vbox5.Gtk.Box+BoxChild
 		this.hbox1 = new global::Gtk.HBox();
 		this.hbox1.Name = "hbox1";
 		this.hbox1.Spacing = 6;
@@ -395,13 +492,13 @@ public partial class MainWindow
 		this.epic_check = new global::Gtk.CheckButton();
 		this.epic_check.CanFocus = true;
 		this.epic_check.Name = "epic_check";
-		this.epic_check.Label = global::Mono.Unix.Catalog.GetString("Epic name");
+		this.epic_check.Label = global::Mono.Unix.Catalog.GetString("Epic");
 		this.epic_check.Active = true;
 		this.epic_check.DrawIndicator = true;
 		this.epic_check.UseUnderline = true;
 		this.hbox1.Add(this.epic_check);
-		global::Gtk.Box.BoxChild w12 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.epic_check]));
-		w12.Position = 0;
+		global::Gtk.Box.BoxChild w11 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.epic_check]));
+		w11.Position = 0;
 		// Container child hbox1.Gtk.Box+BoxChild
 		this.epic_name = new global::Gtk.Entry();
 		this.epic_name.CanFocus = true;
@@ -410,19 +507,19 @@ public partial class MainWindow
 		this.epic_name.IsEditable = true;
 		this.epic_name.InvisibleChar = '•';
 		this.hbox1.Add(this.epic_name);
-		global::Gtk.Box.BoxChild w13 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.epic_name]));
-		w13.Position = 1;
+		global::Gtk.Box.BoxChild w12 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.epic_name]));
+		w12.Position = 1;
 		// Container child hbox1.Gtk.Box+BoxChild
 		this.mos1check = new global::Gtk.CheckButton();
 		this.mos1check.CanFocus = true;
 		this.mos1check.Name = "mos1check";
-		this.mos1check.Label = global::Mono.Unix.Catalog.GetString("Mos1 Name");
+		this.mos1check.Label = global::Mono.Unix.Catalog.GetString("Mos1 ");
 		this.mos1check.Active = true;
 		this.mos1check.DrawIndicator = true;
 		this.mos1check.UseUnderline = true;
 		this.hbox1.Add(this.mos1check);
-		global::Gtk.Box.BoxChild w14 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.mos1check]));
-		w14.Position = 2;
+		global::Gtk.Box.BoxChild w13 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.mos1check]));
+		w13.Position = 2;
 		// Container child hbox1.Gtk.Box+BoxChild
 		this.mos1_name = new global::Gtk.Entry();
 		this.mos1_name.CanFocus = true;
@@ -431,19 +528,19 @@ public partial class MainWindow
 		this.mos1_name.IsEditable = true;
 		this.mos1_name.InvisibleChar = '•';
 		this.hbox1.Add(this.mos1_name);
-		global::Gtk.Box.BoxChild w15 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.mos1_name]));
-		w15.Position = 3;
+		global::Gtk.Box.BoxChild w14 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.mos1_name]));
+		w14.Position = 3;
 		// Container child hbox1.Gtk.Box+BoxChild
 		this.mos2check = new global::Gtk.CheckButton();
 		this.mos2check.CanFocus = true;
 		this.mos2check.Name = "mos2check";
-		this.mos2check.Label = global::Mono.Unix.Catalog.GetString("Mos2 name");
+		this.mos2check.Label = global::Mono.Unix.Catalog.GetString("Mos2 ");
 		this.mos2check.Active = true;
 		this.mos2check.DrawIndicator = true;
 		this.mos2check.UseUnderline = true;
 		this.hbox1.Add(this.mos2check);
-		global::Gtk.Box.BoxChild w16 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.mos2check]));
-		w16.Position = 4;
+		global::Gtk.Box.BoxChild w15 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.mos2check]));
+		w15.Position = 4;
 		// Container child hbox1.Gtk.Box+BoxChild
 		this.mos2_name = new global::Gtk.Entry();
 		this.mos2_name.CanFocus = true;
@@ -452,14 +549,353 @@ public partial class MainWindow
 		this.mos2_name.IsEditable = true;
 		this.mos2_name.InvisibleChar = '•';
 		this.hbox1.Add(this.mos2_name);
-		global::Gtk.Box.BoxChild w17 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.mos2_name]));
-		w17.Position = 5;
-		this.vbox1.Add(this.hbox1);
-		global::Gtk.Box.BoxChild w18 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox1]));
-		w18.Position = 1;
+		global::Gtk.Box.BoxChild w16 = ((global::Gtk.Box.BoxChild)(this.hbox1[this.mos2_name]));
+		w16.Position = 5;
+		this.vbox5.Add(this.hbox1);
+		global::Gtk.Box.BoxChild w17 = ((global::Gtk.Box.BoxChild)(this.vbox5[this.hbox1]));
+		w17.Position = 0;
+		w17.Expand = false;
+		w17.Fill = false;
+		// Container child vbox5.Gtk.Box+BoxChild
+		this.hbox5 = new global::Gtk.HBox();
+		this.hbox5.Name = "hbox5";
+		this.hbox5.Spacing = 6;
+		// Container child hbox5.Gtk.Box+BoxChild
+		this.label13 = new global::Gtk.Label();
+		this.label13.Name = "label13";
+		this.label13.Xpad = 23;
+		this.label13.LabelProp = global::Mono.Unix.Catalog.GetString("Pattern");
+		this.hbox5.Add(this.label13);
+		global::Gtk.Box.BoxChild w18 = ((global::Gtk.Box.BoxChild)(this.hbox5[this.label13]));
+		w18.Position = 0;
 		w18.Expand = false;
 		w18.Fill = false;
-		// Container child vbox1.Gtk.Box+BoxChild
+		// Container child hbox5.Gtk.Box+BoxChild
+		this.vbox2 = new global::Gtk.VBox();
+		this.vbox2.Name = "vbox2";
+		this.vbox2.Spacing = 6;
+		// Container child vbox2.Gtk.Box+BoxChild
+		this.epic_pattern1 = new global::Gtk.Entry();
+		this.epic_pattern1.CanFocus = true;
+		this.epic_pattern1.Name = "epic_pattern1";
+		this.epic_pattern1.Text = global::Mono.Unix.Catalog.GetString("<=4");
+		this.epic_pattern1.IsEditable = true;
+		this.epic_pattern1.InvisibleChar = '•';
+		this.vbox2.Add(this.epic_pattern1);
+		global::Gtk.Box.BoxChild w19 = ((global::Gtk.Box.BoxChild)(this.vbox2[this.epic_pattern1]));
+		w19.Position = 0;
+		w19.Expand = false;
+		w19.Fill = false;
+		// Container child vbox2.Gtk.Box+BoxChild
+		this.epic_pattern2 = new global::Gtk.Entry();
+		this.epic_pattern2.CanFocus = true;
+		this.epic_pattern2.Name = "epic_pattern2";
+		this.epic_pattern2.Text = global::Mono.Unix.Catalog.GetString("<=4");
+		this.epic_pattern2.IsEditable = true;
+		this.epic_pattern2.InvisibleChar = '•';
+		this.vbox2.Add(this.epic_pattern2);
+		global::Gtk.Box.BoxChild w20 = ((global::Gtk.Box.BoxChild)(this.vbox2[this.epic_pattern2]));
+		w20.Position = 1;
+		w20.Expand = false;
+		w20.Fill = false;
+		// Container child vbox2.Gtk.Box+BoxChild
+		this.epic_pattern3 = new global::Gtk.Entry();
+		this.epic_pattern3.CanFocus = true;
+		this.epic_pattern3.Name = "epic_pattern3";
+		this.epic_pattern3.Text = global::Mono.Unix.Catalog.GetString("<=4");
+		this.epic_pattern3.IsEditable = true;
+		this.epic_pattern3.InvisibleChar = '•';
+		this.vbox2.Add(this.epic_pattern3);
+		global::Gtk.Box.BoxChild w21 = ((global::Gtk.Box.BoxChild)(this.vbox2[this.epic_pattern3]));
+		w21.Position = 2;
+		w21.Expand = false;
+		w21.Fill = false;
+		// Container child vbox2.Gtk.Box+BoxChild
+		this.epic_pattern4 = new global::Gtk.Entry();
+		this.epic_pattern4.CanFocus = true;
+		this.epic_pattern4.Name = "epic_pattern4";
+		this.epic_pattern4.Text = global::Mono.Unix.Catalog.GetString("<=4");
+		this.epic_pattern4.IsEditable = true;
+		this.epic_pattern4.InvisibleChar = '•';
+		this.vbox2.Add(this.epic_pattern4);
+		global::Gtk.Box.BoxChild w22 = ((global::Gtk.Box.BoxChild)(this.vbox2[this.epic_pattern4]));
+		w22.Position = 3;
+		w22.Expand = false;
+		w22.Fill = false;
+		this.hbox5.Add(this.vbox2);
+		global::Gtk.Box.BoxChild w23 = ((global::Gtk.Box.BoxChild)(this.hbox5[this.vbox2]));
+		w23.Position = 1;
+		// Container child hbox5.Gtk.Box+BoxChild
+		this.label12 = new global::Gtk.Label();
+		this.label12.Name = "label12";
+		this.label12.Xpad = 23;
+		this.label12.LabelProp = global::Mono.Unix.Catalog.GetString("Pattern");
+		this.hbox5.Add(this.label12);
+		global::Gtk.Box.BoxChild w24 = ((global::Gtk.Box.BoxChild)(this.hbox5[this.label12]));
+		w24.Position = 2;
+		w24.Expand = false;
+		w24.Fill = false;
+		// Container child hbox5.Gtk.Box+BoxChild
+		this.vbox3 = new global::Gtk.VBox();
+		this.vbox3.Name = "vbox3";
+		this.vbox3.Spacing = 6;
+		// Container child vbox3.Gtk.Box+BoxChild
+		this.mos1_pattern1 = new global::Gtk.Entry();
+		this.mos1_pattern1.CanFocus = true;
+		this.mos1_pattern1.Name = "mos1_pattern1";
+		this.mos1_pattern1.Text = global::Mono.Unix.Catalog.GetString("<=12");
+		this.mos1_pattern1.IsEditable = true;
+		this.mos1_pattern1.InvisibleChar = '•';
+		this.vbox3.Add(this.mos1_pattern1);
+		global::Gtk.Box.BoxChild w25 = ((global::Gtk.Box.BoxChild)(this.vbox3[this.mos1_pattern1]));
+		w25.Position = 0;
+		w25.Expand = false;
+		w25.Fill = false;
+		// Container child vbox3.Gtk.Box+BoxChild
+		this.mos1_pattern2 = new global::Gtk.Entry();
+		this.mos1_pattern2.CanFocus = true;
+		this.mos1_pattern2.Name = "mos1_pattern2";
+		this.mos1_pattern2.Text = global::Mono.Unix.Catalog.GetString("<=12");
+		this.mos1_pattern2.IsEditable = true;
+		this.mos1_pattern2.InvisibleChar = '•';
+		this.vbox3.Add(this.mos1_pattern2);
+		global::Gtk.Box.BoxChild w26 = ((global::Gtk.Box.BoxChild)(this.vbox3[this.mos1_pattern2]));
+		w26.Position = 1;
+		w26.Expand = false;
+		w26.Fill = false;
+		// Container child vbox3.Gtk.Box+BoxChild
+		this.mos1_pattern3 = new global::Gtk.Entry();
+		this.mos1_pattern3.CanFocus = true;
+		this.mos1_pattern3.Name = "mos1_pattern3";
+		this.mos1_pattern3.Text = global::Mono.Unix.Catalog.GetString("<=12");
+		this.mos1_pattern3.IsEditable = true;
+		this.mos1_pattern3.InvisibleChar = '•';
+		this.vbox3.Add(this.mos1_pattern3);
+		global::Gtk.Box.BoxChild w27 = ((global::Gtk.Box.BoxChild)(this.vbox3[this.mos1_pattern3]));
+		w27.Position = 2;
+		w27.Expand = false;
+		w27.Fill = false;
+		// Container child vbox3.Gtk.Box+BoxChild
+		this.mos1_pattern4 = new global::Gtk.Entry();
+		this.mos1_pattern4.CanFocus = true;
+		this.mos1_pattern4.Name = "mos1_pattern4";
+		this.mos1_pattern4.Text = global::Mono.Unix.Catalog.GetString("<=12");
+		this.mos1_pattern4.IsEditable = true;
+		this.mos1_pattern4.InvisibleChar = '•';
+		this.vbox3.Add(this.mos1_pattern4);
+		global::Gtk.Box.BoxChild w28 = ((global::Gtk.Box.BoxChild)(this.vbox3[this.mos1_pattern4]));
+		w28.Position = 3;
+		w28.Expand = false;
+		w28.Fill = false;
+		this.hbox5.Add(this.vbox3);
+		global::Gtk.Box.BoxChild w29 = ((global::Gtk.Box.BoxChild)(this.hbox5[this.vbox3]));
+		w29.Position = 3;
+		// Container child hbox5.Gtk.Box+BoxChild
+		this.label10 = new global::Gtk.Label();
+		this.label10.Name = "label10";
+		this.label10.Xpad = 23;
+		this.label10.LabelProp = global::Mono.Unix.Catalog.GetString("Pattern");
+		this.hbox5.Add(this.label10);
+		global::Gtk.Box.BoxChild w30 = ((global::Gtk.Box.BoxChild)(this.hbox5[this.label10]));
+		w30.Position = 4;
+		w30.Expand = false;
+		w30.Fill = false;
+		// Container child hbox5.Gtk.Box+BoxChild
+		this.vbox4 = new global::Gtk.VBox();
+		this.vbox4.Name = "vbox4";
+		this.vbox4.Spacing = 6;
+		// Container child vbox4.Gtk.Box+BoxChild
+		this.mos2_pattern1 = new global::Gtk.Entry();
+		this.mos2_pattern1.CanFocus = true;
+		this.mos2_pattern1.Name = "mos2_pattern1";
+		this.mos2_pattern1.Text = global::Mono.Unix.Catalog.GetString("<=12");
+		this.mos2_pattern1.IsEditable = true;
+		this.mos2_pattern1.InvisibleChar = '•';
+		this.vbox4.Add(this.mos2_pattern1);
+		global::Gtk.Box.BoxChild w31 = ((global::Gtk.Box.BoxChild)(this.vbox4[this.mos2_pattern1]));
+		w31.Position = 0;
+		w31.Expand = false;
+		w31.Fill = false;
+		// Container child vbox4.Gtk.Box+BoxChild
+		this.mos2_pattern2 = new global::Gtk.Entry();
+		this.mos2_pattern2.CanFocus = true;
+		this.mos2_pattern2.Name = "mos2_pattern2";
+		this.mos2_pattern2.Text = global::Mono.Unix.Catalog.GetString("<=12");
+		this.mos2_pattern2.IsEditable = true;
+		this.mos2_pattern2.InvisibleChar = '•';
+		this.vbox4.Add(this.mos2_pattern2);
+		global::Gtk.Box.BoxChild w32 = ((global::Gtk.Box.BoxChild)(this.vbox4[this.mos2_pattern2]));
+		w32.Position = 1;
+		w32.Expand = false;
+		w32.Fill = false;
+		// Container child vbox4.Gtk.Box+BoxChild
+		this.mos2_pattern3 = new global::Gtk.Entry();
+		this.mos2_pattern3.CanFocus = true;
+		this.mos2_pattern3.Name = "mos2_pattern3";
+		this.mos2_pattern3.Text = global::Mono.Unix.Catalog.GetString("<=12");
+		this.mos2_pattern3.IsEditable = true;
+		this.mos2_pattern3.InvisibleChar = '•';
+		this.vbox4.Add(this.mos2_pattern3);
+		global::Gtk.Box.BoxChild w33 = ((global::Gtk.Box.BoxChild)(this.vbox4[this.mos2_pattern3]));
+		w33.Position = 2;
+		w33.Expand = false;
+		w33.Fill = false;
+		// Container child vbox4.Gtk.Box+BoxChild
+		this.mos2_pattern4 = new global::Gtk.Entry();
+		this.mos2_pattern4.CanFocus = true;
+		this.mos2_pattern4.Name = "mos2_pattern4";
+		this.mos2_pattern4.Text = global::Mono.Unix.Catalog.GetString("<=12");
+		this.mos2_pattern4.IsEditable = true;
+		this.mos2_pattern4.InvisibleChar = '•';
+		this.vbox4.Add(this.mos2_pattern4);
+		global::Gtk.Box.BoxChild w34 = ((global::Gtk.Box.BoxChild)(this.vbox4[this.mos2_pattern4]));
+		w34.Position = 3;
+		w34.Expand = false;
+		w34.Fill = false;
+		this.hbox5.Add(this.vbox4);
+		global::Gtk.Box.BoxChild w35 = ((global::Gtk.Box.BoxChild)(this.hbox5[this.vbox4]));
+		w35.Position = 5;
+		this.vbox5.Add(this.hbox5);
+		global::Gtk.Box.BoxChild w36 = ((global::Gtk.Box.BoxChild)(this.vbox5[this.hbox5]));
+		w36.Position = 1;
+		w36.Expand = false;
+		w36.Fill = false;
+		// Container child vbox5.Gtk.Box+BoxChild
+		this.hbox4 = new global::Gtk.HBox();
+		this.hbox4.Name = "hbox4";
+		this.hbox4.Spacing = 6;
+		// Container child hbox4.Gtk.Box+BoxChild
+		this.label14 = new global::Gtk.Label();
+		this.label14.Name = "label14";
+		this.label14.Xpad = 10;
+		this.label14.LabelProp = global::Mono.Unix.Catalog.GetString("timebinsize");
+		this.hbox4.Add(this.label14);
+		global::Gtk.Box.BoxChild w37 = ((global::Gtk.Box.BoxChild)(this.hbox4[this.label14]));
+		w37.Position = 0;
+		w37.Expand = false;
+		w37.Fill = false;
+		// Container child hbox4.Gtk.Box+BoxChild
+		this.epic_timeBinSize = new global::Gtk.Entry();
+		this.epic_timeBinSize.CanFocus = true;
+		this.epic_timeBinSize.Name = "epic_timeBinSize";
+		this.epic_timeBinSize.Text = global::Mono.Unix.Catalog.GetString("100");
+		this.epic_timeBinSize.IsEditable = true;
+		this.epic_timeBinSize.InvisibleChar = '•';
+		this.hbox4.Add(this.epic_timeBinSize);
+		global::Gtk.Box.BoxChild w38 = ((global::Gtk.Box.BoxChild)(this.hbox4[this.epic_timeBinSize]));
+		w38.Position = 1;
+		// Container child hbox4.Gtk.Box+BoxChild
+		this.label15 = new global::Gtk.Label();
+		this.label15.Name = "label15";
+		this.label15.Xpad = 10;
+		this.label15.LabelProp = global::Mono.Unix.Catalog.GetString("timebinsize");
+		this.hbox4.Add(this.label15);
+		global::Gtk.Box.BoxChild w39 = ((global::Gtk.Box.BoxChild)(this.hbox4[this.label15]));
+		w39.Position = 2;
+		w39.Expand = false;
+		w39.Fill = false;
+		// Container child hbox4.Gtk.Box+BoxChild
+		this.mos1_timeBinSize = new global::Gtk.Entry();
+		this.mos1_timeBinSize.CanFocus = true;
+		this.mos1_timeBinSize.Name = "mos1_timeBinSize";
+		this.mos1_timeBinSize.Text = global::Mono.Unix.Catalog.GetString("100");
+		this.mos1_timeBinSize.IsEditable = true;
+		this.mos1_timeBinSize.InvisibleChar = '•';
+		this.hbox4.Add(this.mos1_timeBinSize);
+		global::Gtk.Box.BoxChild w40 = ((global::Gtk.Box.BoxChild)(this.hbox4[this.mos1_timeBinSize]));
+		w40.Position = 3;
+		// Container child hbox4.Gtk.Box+BoxChild
+		this.label11 = new global::Gtk.Label();
+		this.label11.Name = "label11";
+		this.label11.Xpad = 10;
+		this.label11.LabelProp = global::Mono.Unix.Catalog.GetString("timebinsize");
+		this.hbox4.Add(this.label11);
+		global::Gtk.Box.BoxChild w41 = ((global::Gtk.Box.BoxChild)(this.hbox4[this.label11]));
+		w41.Position = 4;
+		w41.Expand = false;
+		w41.Fill = false;
+		// Container child hbox4.Gtk.Box+BoxChild
+		this.mos2_timeBinSize = new global::Gtk.Entry();
+		this.mos2_timeBinSize.CanFocus = true;
+		this.mos2_timeBinSize.Name = "mos2_timeBinSize";
+		this.mos2_timeBinSize.Text = global::Mono.Unix.Catalog.GetString("100");
+		this.mos2_timeBinSize.IsEditable = true;
+		this.mos2_timeBinSize.InvisibleChar = '•';
+		this.hbox4.Add(this.mos2_timeBinSize);
+		global::Gtk.Box.BoxChild w42 = ((global::Gtk.Box.BoxChild)(this.hbox4[this.mos2_timeBinSize]));
+		w42.Position = 5;
+		this.vbox5.Add(this.hbox4);
+		global::Gtk.Box.BoxChild w43 = ((global::Gtk.Box.BoxChild)(this.vbox5[this.hbox4]));
+		w43.Position = 2;
+		w43.Expand = false;
+		w43.Fill = false;
+		// Container child vbox5.Gtk.Box+BoxChild
+		this.hbox6 = new global::Gtk.HBox();
+		this.hbox6.Name = "hbox6";
+		this.hbox6.Spacing = 6;
+		// Container child hbox6.Gtk.Box+BoxChild
+		this.label16 = new global::Gtk.Label();
+		this.label16.Name = "label16";
+		this.label16.LabelProp = global::Mono.Unix.Catalog.GetString("spectralbinsize");
+		this.hbox6.Add(this.label16);
+		global::Gtk.Box.BoxChild w44 = ((global::Gtk.Box.BoxChild)(this.hbox6[this.label16]));
+		w44.Position = 0;
+		w44.Expand = false;
+		w44.Fill = false;
+		// Container child hbox6.Gtk.Box+BoxChild
+		this.epic_spectralbinsize = new global::Gtk.Entry();
+		this.epic_spectralbinsize.CanFocus = true;
+		this.epic_spectralbinsize.Name = "epic_spectralbinsize";
+		this.epic_spectralbinsize.Text = global::Mono.Unix.Catalog.GetString("5");
+		this.epic_spectralbinsize.IsEditable = true;
+		this.epic_spectralbinsize.InvisibleChar = '•';
+		this.hbox6.Add(this.epic_spectralbinsize);
+		global::Gtk.Box.BoxChild w45 = ((global::Gtk.Box.BoxChild)(this.hbox6[this.epic_spectralbinsize]));
+		w45.Position = 1;
+		// Container child hbox6.Gtk.Box+BoxChild
+		this.label17 = new global::Gtk.Label();
+		this.label17.Name = "label17";
+		this.label17.LabelProp = global::Mono.Unix.Catalog.GetString("spectralbinsize");
+		this.hbox6.Add(this.label17);
+		global::Gtk.Box.BoxChild w46 = ((global::Gtk.Box.BoxChild)(this.hbox6[this.label17]));
+		w46.Position = 2;
+		w46.Expand = false;
+		w46.Fill = false;
+		// Container child hbox6.Gtk.Box+BoxChild
+		this.mos1_spectralbinsize = new global::Gtk.Entry();
+		this.mos1_spectralbinsize.CanFocus = true;
+		this.mos1_spectralbinsize.Name = "mos1_spectralbinsize";
+		this.mos1_spectralbinsize.Text = global::Mono.Unix.Catalog.GetString("5");
+		this.mos1_spectralbinsize.IsEditable = true;
+		this.mos1_spectralbinsize.InvisibleChar = '•';
+		this.hbox6.Add(this.mos1_spectralbinsize);
+		global::Gtk.Box.BoxChild w47 = ((global::Gtk.Box.BoxChild)(this.hbox6[this.mos1_spectralbinsize]));
+		w47.Position = 3;
+		// Container child hbox6.Gtk.Box+BoxChild
+		this.label18 = new global::Gtk.Label();
+		this.label18.Name = "label18";
+		this.label18.LabelProp = global::Mono.Unix.Catalog.GetString("spectralbinsize");
+		this.hbox6.Add(this.label18);
+		global::Gtk.Box.BoxChild w48 = ((global::Gtk.Box.BoxChild)(this.hbox6[this.label18]));
+		w48.Position = 4;
+		w48.Expand = false;
+		w48.Fill = false;
+		// Container child hbox6.Gtk.Box+BoxChild
+		this.mos2_spectralbinsize1 = new global::Gtk.Entry();
+		this.mos2_spectralbinsize1.CanFocus = true;
+		this.mos2_spectralbinsize1.Name = "mos2_spectralbinsize1";
+		this.mos2_spectralbinsize1.Text = global::Mono.Unix.Catalog.GetString("5");
+		this.mos2_spectralbinsize1.IsEditable = true;
+		this.mos2_spectralbinsize1.InvisibleChar = '•';
+		this.hbox6.Add(this.mos2_spectralbinsize1);
+		global::Gtk.Box.BoxChild w49 = ((global::Gtk.Box.BoxChild)(this.hbox6[this.mos2_spectralbinsize1]));
+		w49.Position = 5;
+		this.vbox5.Add(this.hbox6);
+		global::Gtk.Box.BoxChild w50 = ((global::Gtk.Box.BoxChild)(this.vbox5[this.hbox6]));
+		w50.Position = 3;
+		w50.Expand = false;
+		w50.Fill = false;
+		// Container child vbox5.Gtk.Box+BoxChild
 		this.hbox2 = new global::Gtk.HBox();
 		this.hbox2.Name = "hbox2";
 		this.hbox2.Spacing = 6;
@@ -468,12 +904,11 @@ public partial class MainWindow
 		this.combine_spectracheck.CanFocus = true;
 		this.combine_spectracheck.Name = "combine_spectracheck";
 		this.combine_spectracheck.Label = global::Mono.Unix.Catalog.GetString("Combine Spectra");
-		this.combine_spectracheck.Active = true;
 		this.combine_spectracheck.DrawIndicator = true;
 		this.combine_spectracheck.UseUnderline = true;
 		this.hbox2.Add(this.combine_spectracheck);
-		global::Gtk.Box.BoxChild w19 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.combine_spectracheck]));
-		w19.Position = 0;
+		global::Gtk.Box.BoxChild w51 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.combine_spectracheck]));
+		w51.Position = 0;
 		// Container child hbox2.Gtk.Box+BoxChild
 		this.combined_spectra_name = new global::Gtk.Entry();
 		this.combined_spectra_name.CanFocus = true;
@@ -482,42 +917,28 @@ public partial class MainWindow
 		this.combined_spectra_name.IsEditable = true;
 		this.combined_spectra_name.InvisibleChar = '•';
 		this.hbox2.Add(this.combined_spectra_name);
-		global::Gtk.Box.BoxChild w20 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.combined_spectra_name]));
-		w20.Position = 1;
+		global::Gtk.Box.BoxChild w52 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.combined_spectra_name]));
+		w52.Position = 1;
 		// Container child hbox2.Gtk.Box+BoxChild
 		this.deleteExtFiles = new global::Gtk.CheckButton();
-		global::Gtk.Tooltips w21 = new Gtk.Tooltips();
-		w21.SetTip(this.deleteExtFiles, "Deleting of extracted files is undesired in some scenario, for example - when we " +
+		global::Gtk.Tooltips w53 = new Gtk.Tooltips();
+		w53.SetTip(this.deleteExtFiles, "Deleting of extracted files is undesired in some scenario, for example - when we " +
 				"need to generate rgs spectra. It needs archive files to exist.", "Deleting of extracted files is undesired in some scenario, for example - when we " +
 				"need to generate rgs spectra. It needs archive files to exist.");
 		this.deleteExtFiles.CanFocus = true;
 		this.deleteExtFiles.Name = "deleteExtFiles";
 		this.deleteExtFiles.Label = global::Mono.Unix.Catalog.GetString("Delete extracted files afterwards");
-		this.deleteExtFiles.Active = true;
 		this.deleteExtFiles.DrawIndicator = true;
 		this.deleteExtFiles.UseUnderline = true;
 		this.hbox2.Add(this.deleteExtFiles);
-		global::Gtk.Box.BoxChild w22 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.deleteExtFiles]));
-		w22.Position = 2;
-		// Container child hbox2.Gtk.Box+BoxChild
-		this.threadedRun = new global::Gtk.CheckButton();
-		w21.SetTip(this.threadedRun, "Threaded run increases chance of program crash, but program is responsive when wo" +
-				"rking.\nIf crash occures, try run program without threading enabled.", "Threaded run increases chance of program crash, but program is responsive when wo" +
-				"rking.\nIf crash occures, try run program without threading enabled.");
-		this.threadedRun.CanFocus = true;
-		this.threadedRun.Name = "threadedRun";
-		this.threadedRun.Label = global::Mono.Unix.Catalog.GetString("Run threaded");
-		this.threadedRun.DrawIndicator = true;
-		this.threadedRun.UseUnderline = true;
-		this.hbox2.Add(this.threadedRun);
-		global::Gtk.Box.BoxChild w23 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.threadedRun]));
-		w23.Position = 3;
-		this.vbox1.Add(this.hbox2);
-		global::Gtk.Box.BoxChild w24 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox2]));
-		w24.Position = 2;
-		w24.Expand = false;
-		w24.Fill = false;
-		// Container child vbox1.Gtk.Box+BoxChild
+		global::Gtk.Box.BoxChild w54 = ((global::Gtk.Box.BoxChild)(this.hbox2[this.deleteExtFiles]));
+		w54.Position = 2;
+		this.vbox5.Add(this.hbox2);
+		global::Gtk.Box.BoxChild w55 = ((global::Gtk.Box.BoxChild)(this.vbox5[this.hbox2]));
+		w55.Position = 4;
+		w55.Expand = false;
+		w55.Fill = false;
+		// Container child vbox5.Gtk.Box+BoxChild
 		this.hbox3 = new global::Gtk.HBox();
 		this.hbox3.Name = "hbox3";
 		this.hbox3.Spacing = 6;
@@ -526,13 +947,13 @@ public partial class MainWindow
 		this.label3.Name = "label3";
 		this.label3.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen  EnergyMin");
 		this.hbox3.Add(this.label3);
-		global::Gtk.Box.BoxChild w25 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label3]));
-		w25.Position = 0;
-		w25.Expand = false;
-		w25.Fill = false;
+		global::Gtk.Box.BoxChild w56 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label3]));
+		w56.Position = 0;
+		w56.Expand = false;
+		w56.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.rmfgenEnergyMin = new global::Gtk.Entry();
-		w21.SetTip(this.rmfgenEnergyMin, "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
+		w53.SetTip(this.rmfgenEnergyMin, "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
 				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
 				"_01.rmf \\\n   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 ", "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
 				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
@@ -543,20 +964,20 @@ public partial class MainWindow
 		this.rmfgenEnergyMin.IsEditable = true;
 		this.rmfgenEnergyMin.InvisibleChar = '•';
 		this.hbox3.Add(this.rmfgenEnergyMin);
-		global::Gtk.Box.BoxChild w26 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMin]));
-		w26.Position = 1;
+		global::Gtk.Box.BoxChild w57 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMin]));
+		w57.Position = 1;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.label9 = new global::Gtk.Label();
 		this.label9.Name = "label9";
 		this.label9.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen EnergyMax");
 		this.hbox3.Add(this.label9);
-		global::Gtk.Box.BoxChild w27 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label9]));
-		w27.Position = 2;
-		w27.Expand = false;
-		w27.Fill = false;
+		global::Gtk.Box.BoxChild w58 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label9]));
+		w58.Position = 2;
+		w58.Expand = false;
+		w58.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.rmfgenEnergyMax = new global::Gtk.Entry();
-		w21.SetTip(this.rmfgenEnergyMax, "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
+		w53.SetTip(this.rmfgenEnergyMax, "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
 				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
 				"_01.rmf \\\n   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 ", "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
 				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
@@ -567,20 +988,20 @@ public partial class MainWindow
 		this.rmfgenEnergyMax.IsEditable = true;
 		this.rmfgenEnergyMax.InvisibleChar = '•';
 		this.hbox3.Add(this.rmfgenEnergyMax);
-		global::Gtk.Box.BoxChild w28 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMax]));
-		w28.Position = 3;
+		global::Gtk.Box.BoxChild w59 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgenEnergyMax]));
+		w59.Position = 3;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.label8 = new global::Gtk.Label();
 		this.label8.Name = "label8";
 		this.label8.LabelProp = global::Mono.Unix.Catalog.GetString("rmfgen nenergybins");
 		this.hbox3.Add(this.label8);
-		global::Gtk.Box.BoxChild w29 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label8]));
-		w29.Position = 4;
-		w29.Expand = false;
-		w29.Fill = false;
+		global::Gtk.Box.BoxChild w60 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.label8]));
+		w60.Position = 4;
+		w60.Expand = false;
+		w60.Fill = false;
 		// Container child hbox3.Gtk.Box+BoxChild
 		this.rmfgennenergybins = new global::Gtk.Entry();
-		w21.SetTip(this.rmfgennenergybins, "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
+		w53.SetTip(this.rmfgennenergybins, "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
 				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
 				"_01.rmf \\\n   withenergybins=yes energymin=0.1 energymax=12.0 nenergybins=2400 ", "This parameter is needed for combine scenario case, when rmfgen is run by differe" +
 				"nt params than usual case\n\nrmfgen spectrumset=src_spectrum_01.ds rmfset=response" +
@@ -591,33 +1012,138 @@ public partial class MainWindow
 		this.rmfgennenergybins.IsEditable = true;
 		this.rmfgennenergybins.InvisibleChar = '•';
 		this.hbox3.Add(this.rmfgennenergybins);
-		global::Gtk.Box.BoxChild w30 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgennenergybins]));
-		w30.Position = 5;
-		this.vbox1.Add(this.hbox3);
-		global::Gtk.Box.BoxChild w31 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox3]));
-		w31.Position = 3;
-		w31.Expand = false;
-		w31.Fill = false;
+		global::Gtk.Box.BoxChild w61 = ((global::Gtk.Box.BoxChild)(this.hbox3[this.rmfgennenergybins]));
+		w61.Position = 5;
+		this.vbox5.Add(this.hbox3);
+		global::Gtk.Box.BoxChild w62 = ((global::Gtk.Box.BoxChild)(this.vbox5[this.hbox3]));
+		w62.Position = 5;
+		w62.Expand = false;
+		w62.Fill = false;
+		this.notebook2.Add(this.vbox5);
+		// Notebook tab
+		this.page1 = new global::Gtk.Label();
+		this.page1.Name = "page1";
+		this.page1.LabelProp = global::Mono.Unix.Catalog.GetString("generation properties");
+		this.notebook2.SetTabLabel(this.vbox5, this.page1);
+		this.page1.ShowAll();
+		// Container child notebook2.Gtk.Notebook+NotebookChild
+		this.vbox6 = new global::Gtk.VBox();
+		this.vbox6.Name = "vbox6";
+		this.vbox6.Spacing = 6;
+		// Container child vbox6.Gtk.Box+BoxChild
+		this.hbox7 = new global::Gtk.HBox();
+		this.hbox7.Name = "hbox7";
+		this.hbox7.Spacing = 6;
+		// Container child hbox7.Gtk.Box+BoxChild
+		this.runguiapps = new global::Gtk.CheckButton();
+		this.runguiapps.CanFocus = true;
+		this.runguiapps.Name = "runguiapps";
+		this.runguiapps.Label = global::Mono.Unix.Catalog.GetString("Run ds9 & dsplot");
+		this.runguiapps.Active = true;
+		this.runguiapps.DrawIndicator = true;
+		this.runguiapps.UseUnderline = true;
+		this.hbox7.Add(this.runguiapps);
+		global::Gtk.Box.BoxChild w64 = ((global::Gtk.Box.BoxChild)(this.hbox7[this.runguiapps]));
+		w64.Position = 0;
+		// Container child hbox7.Gtk.Box+BoxChild
+		this.threadedRun = new global::Gtk.CheckButton();
+		w53.SetTip(this.threadedRun, "Threaded run increases chance of program crash, but program is responsive when wo" +
+				"rking.\nIf crash occures, try run program without threading enabled.", "Threaded run increases chance of program crash, but program is responsive when wo" +
+				"rking.\nIf crash occures, try run program without threading enabled.");
+		this.threadedRun.CanFocus = true;
+		this.threadedRun.Name = "threadedRun";
+		this.threadedRun.Label = global::Mono.Unix.Catalog.GetString("Run threaded");
+		this.threadedRun.Active = true;
+		this.threadedRun.DrawIndicator = true;
+		this.threadedRun.UseUnderline = true;
+		this.hbox7.Add(this.threadedRun);
+		global::Gtk.Box.BoxChild w65 = ((global::Gtk.Box.BoxChild)(this.hbox7[this.threadedRun]));
+		w65.Position = 1;
+		// Container child hbox7.Gtk.Box+BoxChild
+		this.usepredefinedselections = new global::Gtk.CheckButton();
+		w53.SetTip(this.usepredefinedselections, "For this, you should put selection files in /selections/{observation id} folder", "For this, you should put selection files in /selections/{observation id} folder");
+		this.usepredefinedselections.CanFocus = true;
+		this.usepredefinedselections.Name = "usepredefinedselections";
+		this.usepredefinedselections.Label = global::Mono.Unix.Catalog.GetString("Use predefined selections");
+		this.usepredefinedselections.Active = true;
+		this.usepredefinedselections.DrawIndicator = true;
+		this.usepredefinedselections.UseUnderline = true;
+		this.hbox7.Add(this.usepredefinedselections);
+		global::Gtk.Box.BoxChild w66 = ((global::Gtk.Box.BoxChild)(this.hbox7[this.usepredefinedselections]));
+		w66.Position = 2;
+		// Container child hbox7.Gtk.Box+BoxChild
+		this.runxspec = new global::Gtk.CheckButton();
+		w53.SetTip(this.runxspec, "Run xspec and see generated specta after generation", "Run xspec and see generated specta after generation");
+		this.runxspec.CanFocus = true;
+		this.runxspec.Name = "runxspec";
+		this.runxspec.Label = global::Mono.Unix.Catalog.GetString("Run XSPEC afterwards");
+		this.runxspec.Active = true;
+		this.runxspec.DrawIndicator = true;
+		this.runxspec.UseUnderline = true;
+		this.hbox7.Add(this.runxspec);
+		global::Gtk.Box.BoxChild w67 = ((global::Gtk.Box.BoxChild)(this.hbox7[this.runxspec]));
+		w67.Position = 3;
+		this.vbox6.Add(this.hbox7);
+		global::Gtk.Box.BoxChild w68 = ((global::Gtk.Box.BoxChild)(this.vbox6[this.hbox7]));
+		w68.Position = 0;
+		w68.Expand = false;
+		w68.Fill = false;
+		this.notebook2.Add(this.vbox6);
+		global::Gtk.Notebook.NotebookChild w69 = ((global::Gtk.Notebook.NotebookChild)(this.notebook2[this.vbox6]));
+		w69.Position = 1;
+		// Notebook tab
+		this.label7 = new global::Gtk.Label();
+		this.label7.Name = "label7";
+		this.label7.LabelProp = global::Mono.Unix.Catalog.GetString("tool settings");
+		this.notebook2.SetTabLabel(this.vbox6, this.label7);
+		this.label7.ShowAll();
+		this.vbox1.Add(this.notebook2);
+		global::Gtk.Box.BoxChild w70 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.notebook2]));
+		w70.Position = 1;
+		w70.Expand = false;
+		w70.Fill = false;
 		// Container child vbox1.Gtk.Box+BoxChild
+		this.hbox8 = new global::Gtk.HBox();
+		this.hbox8.Name = "hbox8";
+		this.hbox8.Spacing = 6;
+		// Container child hbox8.Gtk.Box+BoxChild
 		this.button2 = new global::Gtk.Button();
 		this.button2.CanFocus = true;
 		this.button2.Name = "button2";
 		this.button2.UseUnderline = true;
 		this.button2.Label = global::Mono.Unix.Catalog.GetString("Generate");
-		this.vbox1.Add(this.button2);
-		global::Gtk.Box.BoxChild w32 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.button2]));
-		w32.PackType = ((global::Gtk.PackType)(1));
-		w32.Position = 4;
-		w32.Expand = false;
-		w32.Fill = false;
+		this.hbox8.Add(this.button2);
+		global::Gtk.Box.BoxChild w71 = ((global::Gtk.Box.BoxChild)(this.hbox8[this.button2]));
+		w71.Position = 0;
+		w71.Expand = false;
+		w71.Fill = false;
+		// Container child hbox8.Gtk.Box+BoxChild
+		this.button1 = new global::Gtk.Button();
+		this.button1.CanFocus = true;
+		this.button1.Name = "button1";
+		this.button1.UseUnderline = true;
+		this.button1.Label = global::Mono.Unix.Catalog.GetString("Re-generate");
+		this.hbox8.Add(this.button1);
+		global::Gtk.Box.BoxChild w72 = ((global::Gtk.Box.BoxChild)(this.hbox8[this.button1]));
+		w72.Position = 1;
+		w72.Expand = false;
+		w72.Fill = false;
+		this.vbox1.Add(this.hbox8);
+		global::Gtk.Box.BoxChild w73 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.hbox8]));
+		w73.Position = 2;
+		w73.Expand = false;
+		w73.Fill = false;
 		this.Add(this.vbox1);
 		if ((this.Child != null))
 		{
 			this.Child.ShowAll();
 		}
 		this.GtkScrolledWindow3.Hide();
+		this.hbox3.Hide();
 		this.Show();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler(this.OnDeleteEvent);
+		this.combine_spectracheck.Clicked += new global::System.EventHandler(this.spectraCheck);
 		this.button2.Clicked += new global::System.EventHandler(this.OnButton2Clicked);
+		this.button1.Clicked += new global::System.EventHandler(this.OnRegenerateClicked);
 	}
 }

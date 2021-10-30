@@ -3,3 +3,8 @@
 /home/misha/Desktop/SasRunner/obj/x86/Debug/SasRunner.csproj.CoreCompileInputs.cache
 /home/misha/Desktop/SasRunner/obj/x86/Debug/SasRunner.exe
 /home/misha/Desktop/SasRunner/obj/x86/Debug/SasRunner.pdb
+/home/xmmsas/Desktop/SasRunner/bin/Debug/SasRunner.exe
+/home/xmmsas/Desktop/SasRunner/bin/Debug/SasRunner.pdb
+/home/xmmsas/Desktop/SasRunner/obj/x86/Debug/SasRunner.csproj.CoreCompileInputs.cache
+/home/xmmsas/Desktop/SasRunner/obj/x86/Debug/SasRunner.exe
+/home/xmmsas/Desktop/SasRunner/obj/x86/Debug/SasRunner.pdb

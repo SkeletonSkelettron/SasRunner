@@ -19,6 +19,11 @@ public partial class MainWindow : Gtk.Window
         a.RetVal = true;
     }
 
+    protected void spectraCheck(object sender, EventArgs e)
+    {
+        hbox3.Visible = combine_spectracheck.Active;
+    }
+
     protected void OnButton2Clicked(object sender, EventArgs e)
     {
         button2.Sensitive = false;
@@ -39,17 +44,28 @@ public partial class MainWindow : Gtk.Window
 
             if (threadedRun.Active)
             {
-                Thread t = new Thread(new ThreadStart(mainWorker));
+                Thread t = new Thread(()=> mainWorker(false));
                 t.Start();
             } 
             else
             {
-                mainWorker();
+                mainWorker(false);
             }
         }
     }
-
-    public void mainWorker()
+    protected void OnRegenerateClicked(object sender, EventArgs e)
+    {
+        if (threadedRun.Active)
+        {
+            Thread t = new Thread(() => mainWorker(true));
+            t.Start();
+        }
+        else
+        {
+            mainWorker(true);
+        }
+    }
+    public void mainWorker(bool regenerate)
     {
 
         var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -75,14 +91,15 @@ public partial class MainWindow : Gtk.Window
             p.WaitForExit(); 
             string ewwewe = p.StandardOutput.ReadToEnd();*/
 
-
-            psi = new System.Diagnostics.ProcessStartInfo("mkdir", "combined");
-            psi.RedirectStandardOutput = true;
-            psi.UseShellExecute = false;
-            psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
-            p = System.Diagnostics.Process.Start(psi);
-            p.WaitForExit();
-
+            if (!regenerate)
+            {
+                psi = new System.Diagnostics.ProcessStartInfo("mkdir", "combined");
+                psi.RedirectStandardOutput = true;
+                psi.UseShellExecute = false;
+                psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
+                p = System.Diagnostics.Process.Start(psi);
+                p.WaitForExit();
+            }
 
             List<string> filesInFolder = new List<string>();
             filesInFolder.AddRange(tool_output.Replace("./", "").Split('\n'));
@@ -93,28 +110,39 @@ public partial class MainWindow : Gtk.Window
             foreach (var archive in filesInFolder)
             {
                 var dir = archive.Replace(".tar.gz", "");
-                psi = new System.Diagnostics.ProcessStartInfo("mkdir", dir);
-                psi.RedirectStandardOutput = true;
-                psi.UseShellExecute = false;
-                psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
-                p = System.Diagnostics.Process.Start(psi);
-                p.WaitForExit();
-
-
+                if (!regenerate)
+                {
+                    psi = new System.Diagnostics.ProcessStartInfo("mkdir", dir);
+                    psi.RedirectStandardOutput = true;
+                    psi.UseShellExecute = false;
+                    psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
+                    p = System.Diagnostics.Process.Start(psi);
+                    p.WaitForExit();
+                }
+                if (usepredefinedselections.Active && !regenerate)
+                {
+                    psi = new System.Diagnostics.ProcessStartInfo("cp");
+                    psi.Arguments = " -a ./selections/" + dir + "/. " + dir;
+                    psi.RedirectStandardOutput = true;
+                    psi.UseShellExecute = false;
+                    psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
+                    p = System.Diagnostics.Process.Start(psi);
+                    p.WaitForExit();
+                }
                 if (epic_check.Active)
                 {
                     runScript(archive, spectra_textview.Buffer.Text, "spectra.sas",
-                        epic_name.Text?.Trim() + i.ToString(), "epic", copiedFiles);
+                        epic_name.Text?.Trim() + i.ToString(), "epic", copiedFiles, regenerate);
                 }
                 if (mos1check.Active)
                 {
                     runScript(archive, spmos1textview.Buffer.Text, "spmos1.sas",
-                        mos1_name.Text?.Trim() + i.ToString(), "_mos1", copiedFiles);
+                        mos1_name.Text?.Trim() + i.ToString(), "_mos1", copiedFiles, regenerate);
                 }
                 if (mos2check.Active)
                 {
                     runScript(archive, spmos2textview.Buffer.Text, "spmos2.sas",
-                        mos2_name.Text?.Trim() + i.ToString(), "_mos2", copiedFiles);
+                        mos2_name.Text?.Trim() + i.ToString(), "_mos2", copiedFiles, regenerate);
                 }
                 combined_script_textview.Buffer.Text += $"\n{i} - {archive} ";
                 i++;
@@ -131,11 +159,37 @@ public partial class MainWindow : Gtk.Window
 
             combined_script_textview.Buffer.Text +="\n" + script;
 
-            logToConsole("combination script");
-            logToConsole(script);
+            if (runxspec.Active)
+            {
+                string xspec_xcm = @"
+cpd /CPS
+setplot energy
+data {data}
+hardcopy generated.ps color
+exit";
 
-
-
+                string data = "";
+                int counter = 1;
+                foreach (var file in copiedFiles.Where(x => x.Contains(".ds")))
+                {
+                    data += $"{counter}:{counter} { file} ";
+                    counter++;
+                }
+                xspec_xcm = xspec_xcm.Replace("{data}", data);
+                System.IO.File.WriteAllText(filechooserwidget1.CurrentFolder + "/combined/xspec.xcm", xspec_xcm);
+                string xspecScript = @"
+. setsas.sh
+xspec - xspec.xcm
+xdg-open generated.ps";
+                System.IO.File.WriteAllText(filechooserwidget1.CurrentFolder + "/combined/xspec.sh", xspecScript);
+                // run sas
+                psi = new System.Diagnostics.ProcessStartInfo("/bin/bash", "xspec.sh");
+                psi.RedirectStandardOutput = false;
+                psi.UseShellExecute = true;
+                psi.WorkingDirectory = filechooserwidget1.CurrentFolder + "/combined";
+                p = System.Diagnostics.Process.Start(psi);
+                p.WaitForExit();
+            }
             watch.Stop();
             var elapsedS = (watch.ElapsedMilliseconds) / 1000;
             ShowDialog("All jobs done\n processing time: " + (elapsedS / 60).ToString() + " minutes");
@@ -163,48 +217,50 @@ public partial class MainWindow : Gtk.Window
     }
 
     public void runScript(string archive, string scriptTxt, string scriptName,
-        string nameToreplaceBy, string jobName, List<string> copiedFiles)
+        string nameToreplaceBy, string jobName, List<string> copiedFiles, bool regenerate)
     {
 
         string workdir = filechooserwidget1.CurrentFolder + "/" + archive.Replace(".tar.gz", "");
 
         logToConsole("\n" + jobName + " begin");
-
-        // extract *.tar.gz file
+        System.Diagnostics.ProcessStartInfo psi;
         List<string> filesTodelete = new List<string>();
-        System.Diagnostics.ProcessStartInfo psi
-        = new System.Diagnostics.ProcessStartInfo("tar", "-xvf " + archive + " --directory " + workdir);
-        psi.RedirectStandardOutput = true;
-        psi.UseShellExecute = false;
-        psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
-        System.Diagnostics.Process p = System.Diagnostics.Process.Start(psi);
-        p.WaitForExit();
-        string tool_output = p.StandardOutput.ReadToEnd();
-        logToConsole("\n" + archive + " - begin extract");
-        filesTodelete.AddRange(tool_output.Replace("./", "").Split('\n'));
+        System.Diagnostics.Process p;
+        // extract *.tar.gz file
+        if (!regenerate)
+        {
+            psi = new System.Diagnostics.ProcessStartInfo("tar", "-xvf " + archive + " --directory " + workdir);
+            psi.RedirectStandardOutput = true;
+            psi.UseShellExecute = false;
+            psi.WorkingDirectory = filechooserwidget1.CurrentFolder;
+            p= System.Diagnostics.Process.Start(psi);
+            p.WaitForExit();
+            string tool_output = p.StandardOutput.ReadToEnd();
+            logToConsole("\n" + archive + " - begin extract");
+            filesTodelete.AddRange(tool_output.Replace("./", "").Split('\n'));
 
 
-        // find new *.TAR file
-        psi = new System.Diagnostics.ProcessStartInfo("find", "-type f -name \"*.TAR\"");
-        psi.RedirectStandardOutput = true;
-        psi.UseShellExecute = false;
-        psi.WorkingDirectory = workdir;
-        p = System.Diagnostics.Process.Start(psi);
-        p.WaitForExit();
-        var fileNewTar = p.StandardOutput.ReadToEnd();
-        var fNN = fileNewTar.Replace("./", "").Replace("\n", "");
+            // find new *.TAR file
+            psi = new System.Diagnostics.ProcessStartInfo("find", "-type f -name \"*.TAR\"");
+            psi.RedirectStandardOutput = true;
+            psi.UseShellExecute = false;
+            psi.WorkingDirectory = workdir;
+            p = System.Diagnostics.Process.Start(psi);
+            p.WaitForExit();
+            var fileNewTar = p.StandardOutput.ReadToEnd();
+            var fNN = fileNewTar.Replace("./", "").Replace("\n", "");
 
-        // extract found tar file
-        psi = new System.Diagnostics.ProcessStartInfo("tar", "-xvf " + fNN);
-        psi.RedirectStandardOutput = true;
-        psi.UseShellExecute = false;
-        psi.WorkingDirectory = workdir; ;
-        p = System.Diagnostics.Process.Start(psi);
-        p.WaitForExit();
-        tool_output = p.StandardOutput.ReadToEnd();
-        logToConsole("\n" + archive + " - done");
-        filesTodelete.AddRange(tool_output.Replace("./", "").Split('\n'));
-
+            // extract found tar file
+            psi = new System.Diagnostics.ProcessStartInfo("tar", "-xvf " + fNN);
+            psi.RedirectStandardOutput = true;
+            psi.UseShellExecute = false;
+            psi.WorkingDirectory = workdir;
+            p = System.Diagnostics.Process.Start(psi);
+            p.WaitForExit();
+            tool_output = p.StandardOutput.ReadToEnd();
+            logToConsole("\n" + archive + " - done");
+            filesTodelete.AddRange(tool_output.Replace("./", "").Split('\n'));
+        }
 
         // run main script
         logToConsole("\n" + workdir + " - processing begin");
@@ -212,15 +268,25 @@ public partial class MainWindow : Gtk.Window
         .Replace("{sas_odf_dir}", workdir)
         .Replace("{nametoreplace}", nameToreplaceBy);
 
+        if (regenerate)
+        {
+            script = script.Replace("{multilinecommentbegin}", "<< 'MULTILINE-COMMENT'");
+            script = script.Replace("{multilinecommentend}", "MULTILINE-COMMENT");
+        }
+        else
+        {
+            script = script.Replace("{multilinecommentbegin}", "");
+            script = script.Replace("{multilinecommentend}", "");
+        }
 
         script = script.Replace("{combine_cp_command}", @"
-cp {nametoreplace}_spec.fits ../combined 
-cp {nametoreplace}_bkg.fits ../combined 
-cp {nametoreplace}.rmf ../combined 
-cp {nametoreplace}.rsp ../combined 
-cp {nametoreplace}.arf ../combined 
-cp {nametoreplace}.ds ../combined
-")
+                            cp {nametoreplace}_spec.fits ../combined 
+                            cp {nametoreplace}_bkg.fits ../combined 
+                            cp {nametoreplace}.rmf ../combined 
+                            cp {nametoreplace}.rsp ../combined 
+                            cp {nametoreplace}.arf ../combined 
+                            cp {nametoreplace}.ds ../combined
+                            ")
         .Replace("{nametoreplace}", nameToreplaceBy);
 
         copiedFiles.Add("{nametoreplace}_spec.fits"
@@ -240,6 +306,15 @@ cp {nametoreplace}.ds ../combined
 
         script = script.Replace("{withspecranges}", combine_spectracheck.Active ? "" : "withspecranges=yes");
 
+        if(runguiapps.Active)
+        {
+            script = script.Replace("{runguiapps}", "");
+        }
+        else
+        {
+            script = script.Replace("{runguiapps}", "#");
+        }
+
         if (combine_spectracheck.Active)
         {
             script = script.Replace("{arfgenNotCombineScript}", "");
@@ -247,27 +322,43 @@ cp {nametoreplace}.ds ../combined
             script = script.Replace("{rmfgenRemainningCombineScript}",
                 $"withenergybins=yes energymin={rmfgenEnergyMin.Text} energymax={rmfgenEnergyMax.Text} nenergybins={rmfgennenergybins.Text} {acceptchanrange} ");
         }
-        else
-        {
             script = script.Replace("{rmfgenRemainningCombineScript}", "");
             if (jobName == "epic")
             {
                 script = script.Replace("{arfgenNotCombineScript}",
                     $"badpixlocation=pn_flt_evt.fits detmaptype=psf psfenergy=1.0 extendedsource=no modelee=yes ");
-            }
+                script = script.Replace("{PATTERN1}", epic_pattern1.Text);
+                script = script.Replace("{PATTERN2}", epic_pattern2.Text);
+                script = script.Replace("{PATTERN3}", epic_pattern3.Text);
+                script = script.Replace("{PATTERN4}", epic_pattern4.Text);
+                script = script.Replace("{spectralbinsize}", epic_spectralbinsize.Text);
+                script = script.Replace("{timebinsize}", epic_timeBinSize.Text);
+
+        }
             if (jobName == "_mos1")
             {
                 script = script.Replace("{arfgenNotCombineScript}",
                     $"badpixlocation=mos1_flt_evt.fits detmaptype=psf ");
-            }
+                script = script.Replace("{PATTERN1}", mos1_pattern1.Text);
+                script = script.Replace("{PATTERN2}", mos1_pattern2.Text);
+                script = script.Replace("{PATTERN3}", mos1_pattern3.Text);
+                script = script.Replace("{PATTERN4}", mos1_pattern4.Text);
+                script = script.Replace("{spectralbinsize}", mos1_spectralbinsize.Text);
+                script = script.Replace("{timebinsize}", mos1_timeBinSize.Text);
+        }
             if (jobName == "_mos2")
             {
                 script = script.Replace("{arfgenNotCombineScript}",
                     $"badpixlocation=mos2_flt_evt.fits detmaptype=psf ");
-            }
+                script = script.Replace("{PATTERN1}", mos2_pattern1.Text);
+                script = script.Replace("{PATTERN2}", mos2_pattern2.Text);
+                script = script.Replace("{PATTERN3}", mos2_pattern3.Text);
+                script = script.Replace("{PATTERN4}", mos2_pattern4.Text);
+                script = script.Replace("{spectralbinsize}", mos2_spectralbinsize1.Text);
+                script = script.Replace("{timebinsize}", mos2_timeBinSize.Text);
         }
 
-        System.IO.File.WriteAllText(workdir + '/' + scriptName, script);
+        System.IO.File.WriteAllText(workdir + "/" + scriptName, script);
         // run sas
         psi = new System.Diagnostics.ProcessStartInfo("/bin/bash", scriptName);
         psi.RedirectStandardOutput = false;
@@ -281,7 +372,7 @@ cp {nametoreplace}.ds ../combined
             foreach (var file in filesTodelete)
             {
                 if (!string.IsNullOrWhiteSpace(file) && !string.IsNullOrEmpty(file))
-                    File.Delete(workdir + '/' + file);
+                    File.Delete(workdir + "/" + file);
             }
         }
     }
